@@ -1,0 +1,29 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = """
+    -v 
+    --cov=src 
+    --cov-report=term-missing 
+    --cov-report=xml:coverage.xml
+    --cov-fail-under=70
+    --asyncio-mode=auto
+"""
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "e2e: end-to-end tests"
+]
+
+[tool.ruff]
+line-length = 88
+target-version = 'py311'
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "Q", "I", "N", "S", "T20"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']

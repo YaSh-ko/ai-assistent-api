@@ -1,0 +1,119 @@
+stages:
+  - lint
+  - test
+  - quality
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  GIT_SUBMODULE_STRATEGY: recursive
+
+lint:
+  stage: lint
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - python -m venv venv
+    - . venv/bin/activate
+    - pip install --upgrade pip ruff
+
+  script:
+    - python -m ruff check --fix src/ tests/ || true
+    - python -m ruff check src/ tests/ || true
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+test:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - python -m venv venv
+    - . venv/bin/activate
+    - pip install --upgrade pip "setuptools<70" wheel
+    - pip install --no-build-isolation -r requirements.txt
+    - pip install pytest pytest-cov pytest-asyncio httpx python-multipart
+  script:
+    - mkdir -p coverage-reports
+    - python -m pytest tests/ --cov=src --cov-report=xml:coverage-reports/coverage.xml -v
+    - ls -la coverage-reports/coverage.xml
+  after_script:
+    - ls -la coverage-reports/
+  artifacts:
+    when: always
+    paths:
+      - coverage-reports/coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-reports/coverage.xml
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}"
+    paths:
+      - venv/
+
+
+
+
+sonarqube-check:
+  stage: quality
+  needs: [test]
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_HOST_URL: "https://sonar.delez-repo.ru"
+  script:
+    - sonar-scanner -Dsonar.host.url=https://sonar.delez-repo.ru -Dsonar.projectKey=root_api_0733c0eb-3533-4a55-bd03-d6f4a7cb5b4e
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+build:
+  stage: build
+  image: docker:24.0-dind
+  services:
+    - docker:24.0-dind
+  script:
+    - docker build -t api-service-staging:$CI_COMMIT_SHORT_SHA .
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client git
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $SSH_USER@$SSH_HOST "CACHEBUST=$CI_COMMIT_SHORT_SHA bash -s" << 'ENDSSH'
+        set -e
+        echo "Deploying API service..."
+        cd ~/PRACTICE/API
+        sed -i 's|^CORS_ORIGINS=.*|CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,https://delez.tech,https://www.delez.tech,https://delez-repo.ru,https://api.delez-repo.ru|g' .env
+        git pull origin main
+        git submodule sync --recursive
+        git submodule update --init --recursive
+        docker build --build-arg CACHEBUST=$CACHEBUST -t api-service-staging:latest .
+        docker-compose -f docker-compose.staging.yml up -d --force-recreate
+        echo "Transitioning database migration IDs..."
+        docker exec staging_api python3 /app/stamp_migrations.py
+        
+        echo "Applying pending migrations..."
+        docker exec -w /app/common staging_api alembic upgrade head
+        echo "API deployed and database migrated successfully!"
+      ENDSSH
+  environment:
+    name: staging
+    url: http://155.212.145.190:8002
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  needs: [build]

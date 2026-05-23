@@ -1,0 +1,71 @@
+"""
+Entry service - create entries and sync to Neo4j.
+ChromaDB sync can be added here when needed.
+"""
+import logging
+from datetime import datetime
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from common.database.models import Entry
+from src.data.repositories.entry import EntryRepository
+from src.infrastructure.neo4j_client import neo4j_client
+
+logger = logging.getLogger(__name__)
+
+
+async def sync_entry_to_neo4j(
+    entry: Entry,
+    language: str = "",
+    duration: float = 0.0,
+) -> None:
+    """Sync Entry to Neo4j graph. Does not raise on failure."""
+    try:
+        query = """
+        MERGE (e:Entry {id: $entry_id})
+        SET e.user_id = $user_id,
+            e.content = $content,
+            e.timestamp = datetime($timestamp),
+            e.word_count = $word_count,
+            e.transcription_language = $language,
+            e.audio_duration = $duration,
+            e.updated_at = datetime()
+        RETURN e
+        """
+        word_count = len((entry.description or "").split())
+        timestamp = datetime.combine(entry.event_date, datetime.min.time())
+        await neo4j_client.execute_query_async(
+            query,
+            {
+                "entry_id": str(entry.id),
+                "user_id": entry.user_id,
+                "content": entry.description or "",
+                "timestamp": timestamp.isoformat(),
+                "word_count": word_count,
+                "language": language,
+                "duration": duration,
+            },
+        )
+        logger.info("Entry %s synced to Neo4j", entry.id)
+    except Exception as e:
+        logger.error("Error syncing entry to Neo4j: %s", e)
+
+
+async def create_entry_and_sync(
+    db: AsyncSession,
+    user_id: str,
+    title: str,
+    description: str,
+    event_date,
+) -> Entry:
+    """Create entry in DB and sync to Neo4j. ChromaDB can be added later."""
+    entry = Entry(
+        user_id=user_id,
+        title=title,
+        description=description,
+        event_date=event_date,
+    )
+    repo = EntryRepository(db)
+    created = await repo.create(entry)
+    await sync_entry_to_neo4j(created, language="", duration=0.0)
+    return created

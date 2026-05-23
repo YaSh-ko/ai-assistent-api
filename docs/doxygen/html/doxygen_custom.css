@@ -1,0 +1,293 @@
+/* Delёz API — кастомная тема Doxygen (в стиле AI Service) */
+
+:root {
+  --delez-accent: #00d4ff;
+  --delez-bg: #0a0e27;
+  --delez-surface: #1a1f3a;
+  --delez-text: #cbd5e0;
+}
+
+/* Общий фон страницы */
+body, html {
+  background: var(--delez-bg) !important;
+  color: var(--delez-text) !important;
+}
+
+/* Шапка */
+#titlearea {
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
+  border-bottom: 2px solid var(--delez-accent);
+  padding: 10px 0;
+}
+
+#projectname {
+  color: var(--delez-accent) !important;
+  text-shadow: 0 0 16px rgba(0, 212, 255, 0.5);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+#projectbrief {
+  color: #a0aec0 !important;
+  font-size: 13px;
+}
+
+/* Навигационные вкладки */
+.tabs, .tabs2, .tabs3 {
+  background: #1a1f3a !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.tablist a, .tablist a:visited {
+  color: #a0aec0 !important;
+}
+
+.tablist a:hover, .tablist li.current a {
+  color: var(--delez-accent) !important;
+  background: rgba(0, 212, 255, 0.08) !important;
+}
+
+/* Боковая навигация */
+#nav-tree, #side-nav {
+  background: #111527 !important;
+  border-right: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+#nav-tree .selected {
+  background: rgba(0, 212, 255, 0.12) !important;
+}
+
+#nav-tree a {
+  color: #a0aec0 !important;
+}
+
+#nav-tree a:hover {
+  color: var(--delez-accent) !important;
+}
+
+/* Основной контент */
+div.contents, #doc-content, #container {
+  background: #0d1124 !important;
+  color: var(--delez-text) !important;
+}
+
+/* Заголовки */
+h1, h2, h3, h4 {
+  color: var(--delez-accent) !important;
+}
+
+h1.doxsection, h2.doxsection, h3.doxsection {
+  color: var(--delez-accent) !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: 4px;
+}
+
+/* Таблицы */
+table.markdownTable, table.doxtable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.markdownTable th, table.doxtable th {
+  background: rgba(0, 212, 255, 0.15) !important;
+  color: var(--delez-accent) !important;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+table.markdownTable td, table.doxtable td {
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  color: var(--delez-text) !important;
+  background: transparent;
+}
+
+table.markdownTable tr:nth-child(even) td,
+table.doxtable tr:nth-child(even) td {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* Блоки кода */
+div.fragment, pre.fragment {
+  background: #0d1124 !important;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-left: 3px solid var(--delez-accent);
+  border-radius: 4px;
+  color: #e2e8f0 !important;
+}
+
+/* Описания функций/классов */
+.memitem {
+  background: #111527 !important;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.memproto {
+  background: rgba(0, 212, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  color: #e2e8f0 !important;
+}
+
+.memdoc {
+  background: #111527 !important;
+  color: var(--delez-text) !important;
+}
+
+/* Теги @param, @return и т.д. */
+dl.section dt {
+  color: var(--delez-accent) !important;
+  font-weight: 600;
+}
+
+dl.section dd {
+  color: var(--delez-text) !important;
+}
+
+/* Поиск */
+#searchli a, #MSearchBox {
+  color: var(--delez-accent) !important;
+}
+
+#MSearchBox {
+  background: #1a1f3a !important;
+  border: 1px solid rgba(0, 212, 255, 0.3) !important;
+  color: var(--delez-text) !important;
+}
+
+/* Футер */
+.navpath, #nav-path {
+  background: #111527 !important;
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.navpath li.footer {
+  color: #4a5568 !important;
+}
+
+/* Ссылки */
+a, a:visited {
+  color: var(--delez-accent) !important;
+}
+
+a:hover {
+  color: #7ee8fa !important;
+  text-decoration: underline;
+}
+
+/* Исходный код */
+.line {
+  color: #e2e8f0 !important;
+}
+
+.keyword { color: #7ee8fa !important; }
+.keywordtype { color: #68d391 !important; }
+.keywordflow { color: #f6ad55 !important; }
+.comment { color: #718096 !important; font-style: italic; }
+.stringliteral { color: #fc8181 !important; }
+.preprocessor { color: #b794f4 !important; }
+
+/* Разделители */
+hr {
+  border-color: rgba(0, 212, 255, 0.15) !important;
+}
+
+/* Описание файла/класса вверху */
+.header {
+  background: #111527 !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.headertitle .title {
+  color: var(--delez-accent) !important;
+}
+
+/* Индексные страницы */
+.directory td, .directory th {
+  background: transparent !important;
+  color: var(--delez-text) !important;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.directory tr:hover td {
+  background: rgba(0, 212, 255, 0.05) !important;
+}
+
+/* Иерархия классов */
+.inherit_header {
+  color: var(--delez-accent) !important;
+}
+
+/* Дополнительные стили для мемберов */
+.memtitle {
+  background: rgba(0, 212, 255, 0.08) !important;
+  color: var(--delez-accent) !important;
+  border-color: rgba(0, 212, 255, 0.2) !important;
+}
+
+/* Группы мемберов */
+.groupheader {
+  color: var(--delez-accent) !important;
+}
+
+/* Детальные описания */
+div.header {
+  background: #0d1124 !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+/* Пагинация и навигация */
+div.summary {
+  color: var(--delez-text) !important;
+}
+
+div.summary a {
+  color: var(--delez-accent) !important;
+}
+
+/* Оглавление */
+div.toc {
+  background: #111527 !important;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+/* Предупреждения и заметки */
+dl.warning, dl.note, dl.todo, dl.bug, dl.deprecated {
+  border-radius: 4px;
+}
+
+/* Синтаксис кода в тексте */
+code, .tt {
+  background: #111527 !important;
+  color: var(--delez-accent) !important;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+}
+
+/* Подсветка строк */
+.lineno {
+  background: #0a0e27 !important;
+  color: #4a5568 !important;
+  border-right-color: rgba(0, 212, 255, 0.2) !important;
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0e27;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}

@@ -1,0 +1,3784 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "delëz API",
+        "description": "Backend API for delëz project",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/v1/health": {
+            "get": {
+                "tags": [
+                    "system"
+                ],
+                "summary": "Health Check",
+                "operationId": "health_check_v1_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/me": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get Current User Example",
+                "description": "Example endpoint showing how to fetch data from the shared User model.",
+                "operationId": "get_current_user_example_v1_user_me_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/auth/sign-up/email": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register new user",
+                "description": "Register a new user with email and password",
+                "operationId": "sign_up_auth_sign_up_email_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignUpRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-in/email": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in with email",
+                "description": "Authenticate user with email and password",
+                "operationId": "sign_in_auth_sign_in_email_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-out": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign out",
+                "description": "Sign out current user and invalidate session",
+                "operationId": "sign_out_auth_sign_out_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignOutResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/get-session": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get current session",
+                "description": "Get current user and session information",
+                "operationId": "get_session_auth_get_session_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No active session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/forget-password": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Request password reset",
+                "description": "Send password reset email to user",
+                "operationId": "forget_password_auth_forget_password_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgetPasswordRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset password",
+                "description": "Reset password using reset token",
+                "operationId": "reset_password_auth_reset_password_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/resend-verification": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend email verification",
+                "description": "Resend verification email to user",
+                "operationId": "resend_verification_auth_resend_verification_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResendVerificationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-email": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify email address",
+                "description": "Verify user's email address using token from email",
+                "operationId": "verify_email_auth_verify_email_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/graph/rhizome": {
+            "get": {
+                "tags": [
+                    "graph"
+                ],
+                "summary": "Get Rhizome Graph",
+                "description": "Get the complete graph for a user.\n\nReturns nodes and links in format suitable for react-force-graph.",
+                "operationId": "get_rhizome_graph_v1_graph_rhizome_get",
+                "parameters": [
+                    {
+                        "name": "node_types",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by node types",
+                            "title": "Node Types"
+                        },
+                        "description": "Filter by node types"
+                    },
+                    {
+                        "name": "time_period",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by time period: past, present, future",
+                            "title": "Time Period"
+                        },
+                        "description": "Filter by time period: past, present, future"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RhizomeGraphResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/graph/search": {
+            "get": {
+                "tags": [
+                    "graph"
+                ],
+                "summary": "Search Graph Nodes",
+                "description": "Search nodes by name or title.",
+                "operationId": "search_graph_nodes_v1_graph_search_get",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "Search query",
+                            "title": "Query"
+                        },
+                        "description": "Search query"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Maximum number of results",
+                            "default": 50,
+                            "title": "Limit"
+                        },
+                        "description": "Maximum number of results"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GraphSearchResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/conversations": {
+            "get": {
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Get Conversations",
+                "description": "Get list of conversations.",
+                "operationId": "get_conversations_v1_conversations_get",
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConversationListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/conversations/recent": {
+            "get": {
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Get Recent Conversations",
+                "description": "Get recent conversations.",
+                "operationId": "get_recent_conversations_v1_conversations_recent_get",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConversationListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/conversations/{id}": {
+            "get": {
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Get Conversation",
+                "description": "Get conversation by ID.",
+                "operationId": "get_conversation_v1_conversations__id__get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConversationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/conversations/thread/{thread_id}/context": {
+            "get": {
+                "tags": [
+                    "conversations"
+                ],
+                "summary": "Get Thread Context",
+                "description": "Get context for a conversation thread (e.g., related Entry).",
+                "operationId": "get_thread_context_v1_conversations_thread__thread_id__context_get",
+                "parameters": [
+                    {
+                        "name": "thread_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Thread Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ThreadContextResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/conversations/{conversation_id}/messages": {
+            "get": {
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get Messages",
+                "description": "Get messages for a conversation.",
+                "operationId": "get_messages_v1_conversations__conversation_id__messages_get",
+                "parameters": [
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Conversation Id"
+                        }
+                    },
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Create Message",
+                "description": "Create a new message.",
+                "operationId": "create_message_v1_conversations__conversation_id__messages_post",
+                "parameters": [
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Conversation Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessageCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/messages/{message_id}/reactions": {
+            "post": {
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Add Reaction",
+                "description": "Add a reaction to a message.",
+                "operationId": "add_reaction_v1_messages__message_id__reactions_post",
+                "parameters": [
+                    {
+                        "name": "message_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Message Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessageReactionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageReactionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entries",
+                "description": "Get list of entries.",
+                "operationId": "get_entries_v1_entries_get",
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EntryListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Create Entry",
+                "description": "Create a new entry (DB + Neo4j sync; ChromaDB can be added in entry_service).",
+                "operationId": "create_entry_v1_entries_post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EntryCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EntryResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/recent": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Recent Entries",
+                "description": "Get recent entries.",
+                "operationId": "get_recent_entries_v1_entries_recent_get",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EntryListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/{id}/analysis": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entry Analysis",
+                "description": "Get complete analysis for an entry.",
+                "operationId": "get_entry_analysis_v1_entries__id__analysis_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EntryAnalysisResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/{id}/intensity-metrics": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entry Intensity Metrics",
+                "description": "Get intensity metrics for an entry.",
+                "operationId": "get_entry_intensity_metrics_v1_entries__id__intensity_metrics_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/IntensityMetricResponse"
+                                    },
+                                    "title": "Response Get Entry Intensity Metrics V1 Entries  Id  Intensity Metrics Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/{id}/related-situations": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entry Related Situations",
+                "description": "Get related situations for an entry.",
+                "operationId": "get_entry_related_situations_v1_entries__id__related_situations_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RelatedSituationResponse"
+                                    },
+                                    "title": "Response Get Entry Related Situations V1 Entries  Id  Related Situations Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/{id}/negative-impacts": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entry Negative Impacts",
+                "description": "Get negative impacts for an entry.",
+                "operationId": "get_entry_negative_impacts_v1_entries__id__negative_impacts_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/NegativeImpactResponse"
+                                    },
+                                    "title": "Response Get Entry Negative Impacts V1 Entries  Id  Negative Impacts Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/entries/{id}/transformations": {
+            "get": {
+                "tags": [
+                    "entries"
+                ],
+                "summary": "Get Entry Transformations",
+                "description": "Get transformations for an entry.",
+                "operationId": "get_entry_transformations_v1_entries__id__transformations_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TransformationResponse"
+                                    },
+                                    "title": "Response Get Entry Transformations V1 Entries  Id  Transformations Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/experiments/{id}": {
+            "get": {
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Get Experiment",
+                "description": "Get experiment by ID from Neo4j.",
+                "operationId": "get_experiment_v1_experiments__id__get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExperimentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/experiments/{id}/intensity-metrics": {
+            "get": {
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Get Experiment Intensity Metrics",
+                "description": "Get intensity metrics for an experiment.",
+                "operationId": "get_experiment_intensity_metrics_v1_experiments__id__intensity_metrics_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/IntensityMetricResponse"
+                                    },
+                                    "title": "Response Get Experiment Intensity Metrics V1 Experiments  Id  Intensity Metrics Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Create Experiment Intensity Metric",
+                "description": "Add an intensity metric for an experiment.",
+                "operationId": "create_experiment_intensity_metric_v1_experiments__id__intensity_metrics_post",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntensityMetricCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntensityMetricResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/experiments/{id}/entries": {
+            "get": {
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Get Experiment Entries",
+                "description": "Get entries that document an experiment.",
+                "operationId": "get_experiment_entries_v1_experiments__id__entries_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EntryForExperimentResponse"
+                                    },
+                                    "title": "Response Get Experiment Entries V1 Experiments  Id  Entries Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/experiments/{id}/summary": {
+            "get": {
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Get Experiment Summary",
+                "description": "Get experiment summary with metrics.",
+                "operationId": "get_experiment_summary_v1_experiments__id__summary_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExperimentSummaryResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/goals": {
+            "get": {
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get Goals",
+                "description": "Get list of goals from Neo4j.",
+                "operationId": "get_goals_v1_goals_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GoalListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/goals/{id}": {
+            "get": {
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get Goal",
+                "description": "Get goal by ID from Neo4j.",
+                "operationId": "get_goal_v1_goals__id__get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GoalResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/goals/{id}/related-entries": {
+            "get": {
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get Goal Related Entries",
+                "description": "Get entries related to a goal.",
+                "operationId": "get_goal_related_entries_v1_goals__id__related_entries_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RelatedEntryResponse"
+                                    },
+                                    "title": "Response Get Goal Related Entries V1 Goals  Id  Related Entries Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/goals/{id}/concepts": {
+            "get": {
+                "tags": [
+                    "goals"
+                ],
+                "summary": "Get Goal Concepts",
+                "description": "Get concepts that a goal is based on.",
+                "operationId": "get_goal_concepts_v1_goals__id__concepts_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ConceptResponse"
+                                    },
+                                    "title": "Response Get Goal Concepts V1 Goals  Id  Concepts Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/analyses/{id}": {
+            "get": {
+                "tags": [
+                    "analyses"
+                ],
+                "summary": "Get Analysis",
+                "description": "Get analysis by ID from Neo4j.",
+                "operationId": "get_analysis_v1_analyses__id__get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnalysisResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/analyses/{id}/concepts": {
+            "get": {
+                "tags": [
+                    "analyses"
+                ],
+                "summary": "Get Analysis Concepts",
+                "description": "Get concepts produced by an analysis.",
+                "operationId": "get_analysis_concepts_v1_analyses__id__concepts_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ConceptResponse"
+                                    },
+                                    "title": "Response Get Analysis Concepts V1 Analyses  Id  Concepts Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/analyses/{id}/goals": {
+            "get": {
+                "tags": [
+                    "analyses"
+                ],
+                "summary": "Get Analysis Goals",
+                "description": "Get goals that an analysis led to.",
+                "operationId": "get_analysis_goals_v1_analyses__id__goals_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GoalResponse"
+                                    },
+                                    "title": "Response Get Analysis Goals V1 Analyses  Id  Goals Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/analyses/{id}/experiments": {
+            "get": {
+                "tags": [
+                    "analyses"
+                ],
+                "summary": "Get Analysis Experiments",
+                "description": "Get experiments that an analysis led to.",
+                "operationId": "get_analysis_experiments_v1_analyses__id__experiments_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ExperimentResponse"
+                                    },
+                                    "title": "Response Get Analysis Experiments V1 Analyses  Id  Experiments Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/audio/transcribe": {
+            "post": {
+                "tags": [
+                    "audio"
+                ],
+                "summary": "Transcribe audio file",
+                "description": "Upload and transcribe an audio file (batch mode)",
+                "operationId": "transcribe_audio_v1_audio_transcribe_post",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Title"
+                        }
+                    },
+                    {
+                        "name": "event_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Event Date"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_transcribe_audio_v1_audio_transcribe_post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TranscriptionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/beta-test": {
+            "post": {
+                "tags": [
+                    "beta-test"
+                ],
+                "summary": "Заявка на бета-тестирование",
+                "description": "Сохраняет telegram и email в таблицу beta_test.",
+                "operationId": "submit_beta_signup_v1_beta_test_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BetaTestSignupRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BetaTestSignupResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/{_full_path}": {
+            "options": {
+                "summary": " Options",
+                "operationId": "_options___full_path__options",
+                "parameters": [
+                    {
+                        "name": "_full_path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": " Full Path"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AnalysisResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "content": {
+                        "type": "string",
+                        "title": "Content"
+                    },
+                    "summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Summary"
+                    },
+                    "analyzed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Analyzed At"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "content",
+                    "analyzed_at",
+                    "user_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "AnalysisResponse",
+                "description": "Analysis response from Neo4j."
+            },
+            "AuthResponse": {
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "session": {
+                        "$ref": "#/components/schemas/SessionResponse"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user",
+                    "session"
+                ],
+                "title": "AuthResponse",
+                "description": "Response for sign up and sign in endpoints."
+            },
+            "BetaTestSignupRequest": {
+                "properties": {
+                    "telegram": {
+                        "type": "string",
+                        "maxLength": 512,
+                        "minLength": 1,
+                        "title": "Telegram",
+                        "description": "Telegram (@username или ссылка)"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email",
+                        "description": "Email для связи"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "telegram",
+                    "email"
+                ],
+                "title": "BetaTestSignupRequest",
+                "description": "Тело запроса с формы https://delez.tech/beta-test."
+            },
+            "BetaTestSignupResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "title": "Success",
+                        "default": true
+                    },
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "title": "BetaTestSignupResponse",
+                "description": "Ответ после успешной записи заявки."
+            },
+            "Body_transcribe_audio_v1_audio_transcribe_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File",
+                        "description": "Audio file to transcribe"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file"
+                ],
+                "title": "Body_transcribe_audio_v1_audio_transcribe_post"
+            },
+            "ConceptResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "relevance": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Relevance"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "user_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "ConceptResponse",
+                "description": "Concept response from Neo4j."
+            },
+            "ConversationListResponse": {
+                "properties": {
+                    "conversations": {
+                        "items": {
+                            "$ref": "#/components/schemas/ConversationResponse"
+                        },
+                        "type": "array",
+                        "title": "Conversations"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "conversations"
+                ],
+                "title": "ConversationListResponse",
+                "description": "List of conversations."
+            },
+            "ConversationResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "thread_id": {
+                        "type": "string",
+                        "title": "Thread Id"
+                    },
+                    "llm_provider": {
+                        "type": "string",
+                        "title": "Llm Provider"
+                    },
+                    "model": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Model"
+                    },
+                    "provider_session_id": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Provider Session Id"
+                    },
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "last_active_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Last Active At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "thread_id",
+                    "llm_provider",
+                    "created_at",
+                    "last_active_at"
+                ],
+                "title": "ConversationResponse",
+                "description": "Conversation response model."
+            },
+            "EntryAnalysisResponse": {
+                "properties": {
+                    "entry": {
+                        "$ref": "#/components/schemas/EntryResponse"
+                    },
+                    "intensity_metrics": {
+                        "items": {
+                            "$ref": "#/components/schemas/IntensityMetricResponse"
+                        },
+                        "type": "array",
+                        "title": "Intensity Metrics"
+                    },
+                    "related_situations": {
+                        "items": {
+                            "$ref": "#/components/schemas/RelatedSituationResponse"
+                        },
+                        "type": "array",
+                        "title": "Related Situations"
+                    },
+                    "negative_impacts": {
+                        "items": {
+                            "$ref": "#/components/schemas/NegativeImpactResponse"
+                        },
+                        "type": "array",
+                        "title": "Negative Impacts"
+                    },
+                    "transformations": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransformationResponse"
+                        },
+                        "type": "array",
+                        "title": "Transformations"
+                    },
+                    "concepts": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "type": "array",
+                        "title": "Concepts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entry",
+                    "intensity_metrics",
+                    "related_situations",
+                    "negative_impacts",
+                    "transformations",
+                    "concepts"
+                ],
+                "title": "EntryAnalysisResponse",
+                "description": "Complete analysis response for an entry."
+            },
+            "EntryCreateRequest": {
+                "properties": {
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "event_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Event Date"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "description",
+                    "event_date"
+                ],
+                "title": "EntryCreateRequest",
+                "description": "Request to create an entry."
+            },
+            "EntryForExperimentResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "content": {
+                        "type": "string",
+                        "title": "Content"
+                    },
+                    "content_summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Content Summary"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Timestamp"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "content",
+                    "timestamp",
+                    "user_id"
+                ],
+                "title": "EntryForExperimentResponse",
+                "description": "Entry that documents an experiment."
+            },
+            "EntryListResponse": {
+                "properties": {
+                    "entries": {
+                        "items": {
+                            "$ref": "#/components/schemas/EntryResponse"
+                        },
+                        "type": "array",
+                        "title": "Entries"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entries"
+                ],
+                "title": "EntryListResponse",
+                "description": "List of entries."
+            },
+            "EntryResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "event_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Event Date"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "description",
+                    "event_date",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "EntryResponse",
+                "description": "Entry response model."
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "title": "Error"
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "error",
+                    "message"
+                ],
+                "title": "ErrorResponse",
+                "description": "Error response schema."
+            },
+            "ExperimentResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "started_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Started At"
+                    },
+                    "ended_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Ended At"
+                    },
+                    "outcome": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Outcome"
+                    },
+                    "success": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Success"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "status",
+                    "user_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "ExperimentResponse",
+                "description": "Experiment response from Neo4j."
+            },
+            "ExperimentSummaryResponse": {
+                "properties": {
+                    "experiment": {
+                        "$ref": "#/components/schemas/ExperimentResponse"
+                    },
+                    "average_intensity": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Average Intensity"
+                    },
+                    "intensity_metrics": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "type": "array",
+                        "title": "Intensity Metrics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "experiment",
+                    "intensity_metrics"
+                ],
+                "title": "ExperimentSummaryResponse",
+                "description": "Experiment summary with metrics."
+            },
+            "ForgetPasswordRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "redirectTo": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Redirectto",
+                        "description": "URL to redirect after password reset"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email"
+                ],
+                "title": "ForgetPasswordRequest",
+                "description": "Request body for forget password endpoint."
+            },
+            "GoalListResponse": {
+                "properties": {
+                    "goals": {
+                        "items": {
+                            "$ref": "#/components/schemas/GoalResponse"
+                        },
+                        "type": "array",
+                        "title": "Goals"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "goals"
+                ],
+                "title": "GoalListResponse",
+                "description": "List of goals."
+            },
+            "GoalResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "priority": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Priority"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "target_date": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Target Date"
+                    },
+                    "achieved_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Achieved At"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "status",
+                    "created_at",
+                    "user_id",
+                    "updated_at"
+                ],
+                "title": "GoalResponse",
+                "description": "Goal response from Neo4j."
+            },
+            "GraphLink": {
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "title": "Source"
+                    },
+                    "target": {
+                        "type": "string",
+                        "title": "Target"
+                    },
+                    "type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Type"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "source",
+                    "target"
+                ],
+                "title": "GraphLink",
+                "description": "Link/edge in the graph."
+            },
+            "GraphNode": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "user": {
+                        "type": "string",
+                        "title": "User"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Type"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "user",
+                    "description",
+                    "type"
+                ],
+                "title": "GraphNode",
+                "description": "Node in the graph."
+            },
+            "GraphSearchResponse": {
+                "properties": {
+                    "nodes": {
+                        "items": {
+                            "$ref": "#/components/schemas/GraphNode"
+                        },
+                        "type": "array",
+                        "title": "Nodes"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "nodes"
+                ],
+                "title": "GraphSearchResponse",
+                "description": "Response for graph search endpoint."
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "IntensityMetricCreateRequest": {
+                "properties": {
+                    "intensity_value": {
+                        "type": "number",
+                        "title": "Intensity Value"
+                    },
+                    "metric_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Metric Date"
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "intensity_value",
+                    "metric_date"
+                ],
+                "title": "IntensityMetricCreateRequest",
+                "description": "Request to create an intensity metric."
+            },
+            "IntensityMetricResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "entity_type": {
+                        "type": "string",
+                        "title": "Entity Type"
+                    },
+                    "entity_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Entity Id"
+                    },
+                    "intensity_value": {
+                        "type": "number",
+                        "title": "Intensity Value"
+                    },
+                    "metric_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Metric Date"
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "entity_type",
+                    "entity_id",
+                    "intensity_value",
+                    "metric_date",
+                    "created_at"
+                ],
+                "title": "IntensityMetricResponse",
+                "description": "Intensity metric response."
+            },
+            "MessageCreateRequest": {
+                "properties": {
+                    "content": {
+                        "type": "string",
+                        "title": "Content"
+                    },
+                    "role": {
+                        "type": "string",
+                        "title": "Role",
+                        "default": "user"
+                    },
+                    "meta_data": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Meta Data"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "content"
+                ],
+                "title": "MessageCreateRequest",
+                "description": "Request to create a message."
+            },
+            "MessageListResponse": {
+                "properties": {
+                    "messages": {
+                        "items": {
+                            "$ref": "#/components/schemas/MessageResponse"
+                        },
+                        "type": "array",
+                        "title": "Messages"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "messages"
+                ],
+                "title": "MessageListResponse",
+                "description": "List of messages."
+            },
+            "MessageReactionRequest": {
+                "properties": {
+                    "reaction_type": {
+                        "type": "string",
+                        "title": "Reaction Type"
+                    },
+                    "emoji": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Emoji"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "reaction_type"
+                ],
+                "title": "MessageReactionRequest",
+                "description": "Request to add a reaction to a message."
+            },
+            "MessageReactionResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "message_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Message Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "reaction_type": {
+                        "type": "string",
+                        "title": "Reaction Type"
+                    },
+                    "emoji": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Emoji"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "message_id",
+                    "user_id",
+                    "reaction_type",
+                    "created_at"
+                ],
+                "title": "MessageReactionResponse",
+                "description": "Message reaction response."
+            },
+            "MessageResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "conversation_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Conversation Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "role": {
+                        "type": "string",
+                        "title": "Role"
+                    },
+                    "content": {
+                        "type": "string",
+                        "title": "Content"
+                    },
+                    "meta_data": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Meta Data"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "conversation_id",
+                    "user_id",
+                    "role",
+                    "content",
+                    "created_at"
+                ],
+                "title": "MessageResponse",
+                "description": "Message response model."
+            },
+            "NegativeImpactResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "title": "Source Type"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Source Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "severity": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Severity"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "source_type",
+                    "source_id",
+                    "title",
+                    "created_at"
+                ],
+                "title": "NegativeImpactResponse",
+                "description": "Negative impact response."
+            },
+            "RelatedEntryResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "content": {
+                        "type": "string",
+                        "title": "Content"
+                    },
+                    "content_summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Content Summary"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Timestamp"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    }
+                },
+                "additionalProperties": true,
+                "type": "object",
+                "required": [
+                    "id",
+                    "content",
+                    "timestamp",
+                    "user_id"
+                ],
+                "title": "RelatedEntryResponse",
+                "description": "Entry related to a goal."
+            },
+            "RelatedSituationResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "title": "Source Type"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Source Id"
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "title": "Target Type"
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Target Id"
+                    },
+                    "target_title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Target Title"
+                    },
+                    "relation_type": {
+                        "type": "string",
+                        "title": "Relation Type"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "source_type",
+                    "source_id",
+                    "target_type",
+                    "target_id",
+                    "relation_type",
+                    "created_at"
+                ],
+                "title": "RelatedSituationResponse",
+                "description": "Related situation response."
+            },
+            "ResendVerificationRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email"
+                ],
+                "title": "ResendVerificationRequest",
+                "description": "Request body for resend verification endpoint."
+            },
+            "ResetPasswordRequest": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "title": "Token"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6,
+                        "title": "Password",
+                        "description": "New password must be at least 6 characters"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token",
+                    "password"
+                ],
+                "title": "ResetPasswordRequest",
+                "description": "Request body for reset password endpoint."
+            },
+            "RhizomeGraphResponse": {
+                "properties": {
+                    "nodes": {
+                        "items": {
+                            "$ref": "#/components/schemas/GraphNode"
+                        },
+                        "type": "array",
+                        "title": "Nodes"
+                    },
+                    "links": {
+                        "items": {
+                            "$ref": "#/components/schemas/GraphLink"
+                        },
+                        "type": "array",
+                        "title": "Links"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "nodes",
+                    "links"
+                ],
+                "title": "RhizomeGraphResponse",
+                "description": "Response for rhizome graph endpoint."
+            },
+            "SessionResponse": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "title": "Token"
+                    },
+                    "expiresAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Expiresat"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token",
+                    "expiresAt"
+                ],
+                "title": "SessionResponse",
+                "description": "Session data in response."
+            },
+            "SignInRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "SignInRequest",
+                "description": "Request body for sign in endpoint."
+            },
+            "SignOutResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "title": "Success",
+                        "default": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message",
+                        "default": "Logged out successfully"
+                    }
+                },
+                "type": "object",
+                "title": "SignOutResponse",
+                "description": "Response for sign out endpoint."
+            },
+            "SignUpRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "title": "Email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6,
+                        "title": "Password",
+                        "description": "Password must be at least 6 characters"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name",
+                        "description": "User's display name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "SignUpRequest",
+                "description": "Request body for sign up endpoint."
+            },
+            "SuccessResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "title": "Success",
+                        "default": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "title": "SuccessResponse",
+                "description": "Generic success response."
+            },
+            "ThreadContextResponse": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "title": "Type"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "entry_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Entry Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type",
+                    "title"
+                ],
+                "title": "ThreadContextResponse",
+                "description": "Context information for a conversation thread based on linked entries/events."
+            },
+            "TranscriptionResponse": {
+                "properties": {
+                    "entry_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Entry Id"
+                    },
+                    "text": {
+                        "type": "string",
+                        "title": "Text"
+                    },
+                    "language": {
+                        "type": "string",
+                        "title": "Language"
+                    },
+                    "duration": {
+                        "type": "number",
+                        "title": "Duration"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entry_id",
+                    "text",
+                    "language",
+                    "duration",
+                    "created_at"
+                ],
+                "title": "TranscriptionResponse",
+                "description": "Response for audio transcription."
+            },
+            "TransformationResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "title": "Source Type"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Source Id"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Category"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "source_type",
+                    "source_id",
+                    "title",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "TransformationResponse",
+                "description": "Transformation response."
+            },
+            "UserResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "email": {
+                        "type": "string",
+                        "title": "Email"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "createdAt": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Createdat"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "email"
+                ],
+                "title": "UserResponse",
+                "description": "User data in response."
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    },
+                    "input": {
+                        "title": "Input"
+                    },
+                    "ctx": {
+                        "type": "object",
+                        "title": "Context"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "VerifyEmailRequest": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "title": "Token",
+                        "description": "Verification token from email"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token"
+                ],
+                "title": "VerifyEmailRequest",
+                "description": "Request body for verify email endpoint."
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "/api"
+        }
+    ]
+}

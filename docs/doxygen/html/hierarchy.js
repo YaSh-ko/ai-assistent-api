@@ -1,0 +1,85 @@
+var hierarchy =
+[
+    [ "src.services.audio_transcription_service.AudioTranscriptionService", "classsrc_1_1services_1_1audio__transcription__service_1_1AudioTranscriptionService.html", null ],
+    [ "src.services.auth_service.AuthService", "classsrc_1_1services_1_1auth__service_1_1AuthService.html", null ],
+    [ "BaseModel", null, [
+      [ "src.api.v1.schemas.analyses.AnalysisResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1analyses_1_1AnalysisResponse.html", null ],
+      [ "src.api.v1.schemas.audio.TranscriptionRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1audio_1_1TranscriptionRequest.html", null ],
+      [ "src.api.v1.schemas.audio.TranscriptionResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1audio_1_1TranscriptionResponse.html", null ],
+      [ "src.api.v1.schemas.audio.TranscriptionStreamResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1audio_1_1TranscriptionStreamResponse.html", null ],
+      [ "src.api.v1.schemas.auth.AuthResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1AuthResponse.html", null ],
+      [ "src.api.v1.schemas.auth.ErrorResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1ErrorResponse.html", null ],
+      [ "src.api.v1.schemas.auth.ForgetPasswordRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1ForgetPasswordRequest.html", null ],
+      [ "src.api.v1.schemas.auth.ResendVerificationRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1ResendVerificationRequest.html", null ],
+      [ "src.api.v1.schemas.auth.ResetPasswordRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1ResetPasswordRequest.html", null ],
+      [ "src.api.v1.schemas.auth.SessionResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SessionResponse.html", null ],
+      [ "src.api.v1.schemas.auth.SignInRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SignInRequest.html", null ],
+      [ "src.api.v1.schemas.auth.SignOutResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SignOutResponse.html", null ],
+      [ "src.api.v1.schemas.auth.SignUpRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SignUpRequest.html", null ],
+      [ "src.api.v1.schemas.auth.SuccessResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SuccessResponse.html", null ],
+      [ "src.api.v1.schemas.auth.UserResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1UserResponse.html", null ],
+      [ "src.api.v1.schemas.auth.VerifyEmailRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1VerifyEmailRequest.html", null ],
+      [ "src.api.v1.schemas.beta_test.BetaTestSignupRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1beta__test_1_1BetaTestSignupRequest.html", null ],
+      [ "src.api.v1.schemas.beta_test.BetaTestSignupResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1beta__test_1_1BetaTestSignupResponse.html", null ],
+      [ "src.api.v1.schemas.conversations.ConversationListResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1conversations_1_1ConversationListResponse.html", null ],
+      [ "src.api.v1.schemas.conversations.ConversationResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1conversations_1_1ConversationResponse.html", null ],
+      [ "src.api.v1.schemas.conversations.ThreadContextResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1conversations_1_1ThreadContextResponse.html", null ],
+      [ "src.api.v1.schemas.entries.EntryAnalysisResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1EntryAnalysisResponse.html", null ],
+      [ "src.api.v1.schemas.entries.EntryCreateRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1EntryCreateRequest.html", null ],
+      [ "src.api.v1.schemas.entries.EntryListResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1EntryListResponse.html", null ],
+      [ "src.api.v1.schemas.entries.EntryResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1EntryResponse.html", null ],
+      [ "src.api.v1.schemas.entries.IntensityMetricCreateRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1IntensityMetricCreateRequest.html", null ],
+      [ "src.api.v1.schemas.entries.IntensityMetricResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1IntensityMetricResponse.html", null ],
+      [ "src.api.v1.schemas.entries.NegativeImpactResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1NegativeImpactResponse.html", null ],
+      [ "src.api.v1.schemas.entries.RelatedSituationResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1RelatedSituationResponse.html", null ],
+      [ "src.api.v1.schemas.entries.TransformationResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1entries_1_1TransformationResponse.html", null ],
+      [ "src.api.v1.schemas.experiments.EntryForExperimentResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1experiments_1_1EntryForExperimentResponse.html", null ],
+      [ "src.api.v1.schemas.experiments.ExperimentResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1experiments_1_1ExperimentResponse.html", null ],
+      [ "src.api.v1.schemas.experiments.ExperimentSummaryResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1experiments_1_1ExperimentSummaryResponse.html", null ],
+      [ "src.api.v1.schemas.goals.ConceptResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1goals_1_1ConceptResponse.html", null ],
+      [ "src.api.v1.schemas.goals.GoalListResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1goals_1_1GoalListResponse.html", null ],
+      [ "src.api.v1.schemas.goals.GoalResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1goals_1_1GoalResponse.html", null ],
+      [ "src.api.v1.schemas.goals.RelatedEntryResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1goals_1_1RelatedEntryResponse.html", null ],
+      [ "src.api.v1.schemas.graph.GraphLink", "classsrc_1_1api_1_1v1_1_1schemas_1_1graph_1_1GraphLink.html", null ],
+      [ "src.api.v1.schemas.graph.GraphNode", "classsrc_1_1api_1_1v1_1_1schemas_1_1graph_1_1GraphNode.html", null ],
+      [ "src.api.v1.schemas.graph.GraphSearchResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1graph_1_1GraphSearchResponse.html", null ],
+      [ "src.api.v1.schemas.graph.RhizomeGraphResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1graph_1_1RhizomeGraphResponse.html", null ],
+      [ "src.api.v1.schemas.messages.MessageCreateRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1messages_1_1MessageCreateRequest.html", null ],
+      [ "src.api.v1.schemas.messages.MessageListResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1messages_1_1MessageListResponse.html", null ],
+      [ "src.api.v1.schemas.messages.MessageReactionRequest", "classsrc_1_1api_1_1v1_1_1schemas_1_1messages_1_1MessageReactionRequest.html", null ],
+      [ "src.api.v1.schemas.messages.MessageReactionResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1messages_1_1MessageReactionResponse.html", null ],
+      [ "src.api.v1.schemas.messages.MessageResponse", "classsrc_1_1api_1_1v1_1_1schemas_1_1messages_1_1MessageResponse.html", null ],
+      [ "src.core.config.EmailConfigModel", "classsrc_1_1core_1_1config_1_1EmailConfigModel.html", null ]
+    ] ],
+    [ "BaseSettings", null, [
+      [ "src.core.config.Settings", "classsrc_1_1core_1_1config_1_1Settings.html", null ]
+    ] ],
+    [ "src.api.v1.schemas.auth.SessionResponse.Config", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1SessionResponse_1_1Config.html", null ],
+    [ "src.api.v1.schemas.auth.UserResponse.Config", "classsrc_1_1api_1_1v1_1_1schemas_1_1auth_1_1UserResponse_1_1Config.html", null ],
+    [ "src.services.email_service.EmailService", "classsrc_1_1services_1_1email__service_1_1EmailService.html", null ],
+    [ "Generic", null, [
+      [ "src.data.repositories.base.BaseRepository", "classsrc_1_1data_1_1repositories_1_1base_1_1BaseRepository.html", [
+        [ "src.data.repositories.conversation.ConversationRepository", "classsrc_1_1data_1_1repositories_1_1conversation_1_1ConversationRepository.html", null ],
+        [ "src.data.repositories.entry.EntryRepository", "classsrc_1_1data_1_1repositories_1_1entry_1_1EntryRepository.html", null ],
+        [ "src.data.repositories.message.MessageRepository", "classsrc_1_1data_1_1repositories_1_1message_1_1MessageRepository.html", null ],
+        [ "src.data.repositories.metrics.IntensityMetricRepository", "classsrc_1_1data_1_1repositories_1_1metrics_1_1IntensityMetricRepository.html", null ],
+        [ "src.data.repositories.negative_impact.NegativeImpactRepository", "classsrc_1_1data_1_1repositories_1_1negative__impact_1_1NegativeImpactRepository.html", null ],
+        [ "src.data.repositories.related_situation.RelatedSituationRepository", "classsrc_1_1data_1_1repositories_1_1related__situation_1_1RelatedSituationRepository.html", null ],
+        [ "src.data.repositories.transformation.TransformationRepository", "classsrc_1_1data_1_1repositories_1_1transformation_1_1TransformationRepository.html", null ]
+      ] ]
+    ] ],
+    [ "HTTPException", null, [
+      [ "src.core.exceptions.AuthException", "classsrc_1_1core_1_1exceptions_1_1AuthException.html", [
+        [ "src.core.exceptions.InvalidCredentialsException", "classsrc_1_1core_1_1exceptions_1_1InvalidCredentialsException.html", null ],
+        [ "src.core.exceptions.InvalidTokenException", "classsrc_1_1core_1_1exceptions_1_1InvalidTokenException.html", null ],
+        [ "src.core.exceptions.SessionExpiredException", "classsrc_1_1core_1_1exceptions_1_1SessionExpiredException.html", null ],
+        [ "src.core.exceptions.UnauthorizedException", "classsrc_1_1core_1_1exceptions_1_1UnauthorizedException.html", null ],
+        [ "src.core.exceptions.UserAlreadyExistsException", "classsrc_1_1core_1_1exceptions_1_1UserAlreadyExistsException.html", null ],
+        [ "src.core.exceptions.UserNotFoundException", "classsrc_1_1core_1_1exceptions_1_1UserNotFoundException.html", null ]
+      ] ],
+      [ "src.core.exceptions.BadRequestException", "classsrc_1_1core_1_1exceptions_1_1BadRequestException.html", null ],
+      [ "src.core.exceptions.JwtConfigurationException", "classsrc_1_1core_1_1exceptions_1_1JwtConfigurationException.html", null ]
+    ] ],
+    [ "src.infrastructure.neo4j_client.Neo4jClient", "classsrc_1_1infrastructure_1_1neo4j__client_1_1Neo4jClient.html", null ],
+    [ "src.infrastructure.whisper_streaming_client.WhisperStreamingClient", "classsrc_1_1infrastructure_1_1whisper__streaming__client_1_1WhisperStreamingClient.html", null ]
+];

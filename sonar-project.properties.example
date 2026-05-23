@@ -1,0 +1,33 @@
+# SonarQube project configuration
+# Скопируйте этот файл в sonar-project.properties и заполните токен
+
+sonar.projectKey=api-public
+sonar.projectName=API ПУБЛИЧНЫЙ
+sonar.projectVersion=0.1.0
+
+# SonarQube server
+sonar.host.url=http://155.212.144.219
+# Token should be set via environment variable SONARQUBE_TOKEN
+# Example: export SONARQUBE_TOKEN=your_token_here
+# Or pass via command line: sonar-scanner -Dsonar.token=YOUR_TOKEN
+sonar.token=${SONARQUBE_TOKEN}
+
+# Source code
+sonar.sources=src
+sonar.sourceEncoding=UTF-8
+
+# Test sources
+sonar.tests=tests
+sonar.test.inclusions=**/test_*.py,**/tests/**
+
+# Exclusions
+sonar.exclusions=**/__pycache__/**,**/venv/**,**/.venv/**,**/migrations/**,**/common/**,**/Progect_files/**,**/node_modules/**
+
+# Python specific
+sonar.python.version=3.11,3.12,3.13
+
+# Coverage reports (если используется)
+# sonar.python.coverage.reportPaths=coverage.xml
+
+# Code duplication
+sonar.cpd.exclusions=**/migrations/**,**/tests/**
