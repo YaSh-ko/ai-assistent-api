@@ -2,6 +2,7 @@
 Configuration for API service using Pydantic Settings.
 """
 import json
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator, model_validator
 from typing import Optional
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
     POSTGRES_HOST: Optional[str] = None  # Должен быть задан через переменную окружения
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "philosophy_staging"
+    POSTGRES_DB: str = "db_for_delez"
     POSTGRES_USER: Optional[str] = None
     POSTGRES_PASSWORD: str = ""
     
@@ -55,9 +56,9 @@ class Settings(BaseSettings):
         
         return f"postgresql+asyncpg://{encoded_user}:{encoded_password}@{host}:{port}/{db}"
     
-    # Neo4j
-    NEO4J_URI: str = "bolt+ssc://neo4j.delez-repo.ru:7687"
-    NEO4J_USER: str = "Admin_delezDB_neo"
+    # Neo4j (локальная разработка; переопределяется через .env)
+    NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = ""
     
     # ChromaDB (mapped to 8001 in docker-compose.staging.yml)
@@ -111,13 +112,19 @@ class Settings(BaseSettings):
             self.JWT_PUBLIC_KEY_PEM = normalize_pem(self.JWT_PUBLIC_KEY_PEM)
         return self
     
-    # CORS - может быть задан как JSON строка или список через запятую
-    # По умолчанию только https; для локальной разработки добавьте в CORS_ORIGINS через .env:
-    # CORS_ORIGINS=https://delez.tech,https://www.delez.tech,http://localhost:3000,http://127.0.0.1:3000
+    # CORS — по умолчанию только localhost (прод добавляйте явно в .env, если нужно)
     CORS_ORIGINS: str | list[str] = [
-        "https://delez.tech",
-        "https://www.delez.tech",  # Поддержка www subdomain
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
     ]
+
+    _BLOCKED_DB_HOST_FRAGMENTS: tuple[str, ...] = (
+        "delez-repo.ru",
+        "neo4j.delez",
+        "85.198.103.254",
+        "philosophy_staging",
+    )
     
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -139,12 +146,26 @@ class Settings(BaseSettings):
             # Иначе возвращаем как список с одним элементом
             return [v.strip()] if v.strip() else []
         return []
+
+    @model_validator(mode="after")
+    def reject_remote_production_database_hosts(self) -> "Settings":
+        """Не подключаться к прод/удалённым БД, если хост случайно попал в .env."""
+        if os.getenv("ALLOW_REMOTE_DATABASE", "").lower() in ("1", "true", "yes"):
+            return self
+        combined = f"{self.db_url} {self.NEO4J_URI} {self.POSTGRES_HOST or ''}"
+        for fragment in self._BLOCKED_DB_HOST_FRAGMENTS:
+            if fragment in combined:
+                raise ValueError(
+                    f"Refusing remote/production database host fragment {fragment!r}. "
+                    "Use local .env (see .env.example) or set ALLOW_REMOTE_DATABASE=true."
+                )
+        return self
     
     model_config = SettingsConfigDict(
-        env_file=".env", 
+        env_file=(".env", ".env.local"),
         env_nested_delimiter="__",
         env_file_encoding="utf-8",
-        extra="ignore"
+        extra="ignore",
     )
 
 

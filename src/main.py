@@ -200,10 +200,7 @@ def create_app() -> FastAPI:
     )
 
     _ensure_cors_origins_list()
-    # Добавляем WWW вариант в список разрешенных
-    if "https://delez.tech" in settings.CORS_ORIGINS and "https://www.delez.tech" not in settings.CORS_ORIGINS:
-        settings.CORS_ORIGINS.append("https://www.delez.tech")
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,

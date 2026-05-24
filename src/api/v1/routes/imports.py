@@ -1,7 +1,6 @@
 """
 Markdown import endpoints.
 """
-from uuid import uuid4
 from typing import Annotated, List, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -14,8 +13,9 @@ from src.api.v1.schemas.imports import (
     CreatedEntityRef,
 )
 from src.core.database import get_db
-from src.infrastructure.neo4j_client import neo4j_client
 from src.services.entry_service import create_entry_and_sync
+from src.services.goal_service import create_goal_and_sync
+from src.services.experiment_service import create_experiment_and_sync
 
 router = APIRouter()
 
@@ -99,31 +99,12 @@ async def import_markdown(
 
     if request.create_goals:
         for text in sections["goals"]:
-            goal_id = str(uuid4())
-            query = """
-            CREATE (g:Goal {
-              id: $id,
-              title: $title,
-              description: $description,
-              status: $status,
-              priority: $priority,
-              user_id: $user_id,
-              created_at: datetime(),
-              updated_at: datetime()
-            })
-            RETURN g.id as id
-            """
             try:
-                await neo4j_client.execute_query_async(
-                    query,
-                    {
-                        "id": goal_id,
-                        "title": text[:160],
-                        "description": text,
-                        "status": "active",
-                        "priority": "medium",
-                        "user_id": user_id,
-                    },
+                created = await create_goal_and_sync(
+                    db=db,
+                    user_id=user_id,
+                    title=text[:160],
+                    description=text,
                 )
             except Exception as e:
                 raise HTTPException(
@@ -131,39 +112,21 @@ async def import_markdown(
                     detail=f"Failed to import goal: {str(e)}",
                 )
             created_entities.append(
-                CreatedEntityRef(id=goal_id, title=text[:160], entity_type="goal")
+                CreatedEntityRef(
+                    id=str(created.id),
+                    title=created.title or text[:160],
+                    entity_type="goal",
+                )
             )
 
     if request.create_experiments:
         for text in sections["experiments"]:
-            experiment_id = str(uuid4())
-            query = """
-            CREATE (e:Experiment {
-              id: $id,
-              title: $title,
-              description: $description,
-              status: $status,
-              success: $success,
-              outcome: $outcome,
-              user_id: $user_id,
-              created_at: datetime(),
-              updated_at: datetime(),
-              started_at: datetime()
-            })
-            RETURN e.id as id
-            """
             try:
-                await neo4j_client.execute_query_async(
-                    query,
-                    {
-                        "id": experiment_id,
-                        "title": text[:160],
-                        "description": text,
-                        "status": "active",
-                        "success": 0,
-                        "outcome": "",
-                        "user_id": user_id,
-                    },
+                created = await create_experiment_and_sync(
+                    db=db,
+                    user_id=user_id,
+                    title=text[:160],
+                    description=text,
                 )
             except Exception as e:
                 raise HTTPException(
@@ -171,7 +134,11 @@ async def import_markdown(
                     detail=f"Failed to import experiment: {str(e)}",
                 )
             created_entities.append(
-                CreatedEntityRef(id=experiment_id, title=text[:160], entity_type="experiment")
+                CreatedEntityRef(
+                    id=str(created.id),
+                    title=created.title or text[:160],
+                    entity_type="experiment",
+                )
             )
 
     entries_created = len([e for e in created_entities if e.entity_type == "entry"])

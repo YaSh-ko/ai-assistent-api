@@ -43,6 +43,15 @@ class GoalResponse(BaseModel):
     model_config = {"extra": "allow"}
 
 
+class GoalCreateRequest(BaseModel):
+    """Request to create a goal."""
+    title: Optional[str] = None
+    description: str
+    status: str = "active"
+    priority: str = "medium"
+    target_date: Optional[date] = None
+
+
 class GoalListResponse(BaseModel):
     """List of goals."""
     goals: List[GoalResponse]

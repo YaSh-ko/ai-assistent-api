@@ -80,6 +80,20 @@ class ExperimentDetailResponse(BaseModel):
     tested_concepts: List[TestedConceptResponse]
 
 
+class ExperimentCreateRequest(BaseModel):
+    """Request to create an experiment."""
+    title: Optional[str] = None
+    description: str
+    status: str = "active"
+    success: int = 0
+    outcome: Optional[str] = ""
+
+
+class ExperimentListResponse(BaseModel):
+    """List of experiments."""
+    experiments: List[ExperimentResponse]
+
+
 class ExperimentUpdateRequest(BaseModel):
     """Обновление статуса / результата эксперимента."""
     status: Optional[str] = None

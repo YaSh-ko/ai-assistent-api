@@ -23,6 +23,8 @@ SOURCE_ID_COLUMN = "source_id"
 CASCADE_DELETE = "CASCADE"
 USER_TABLE_FK = "user.id"
 ENTRIES_TABLE_FK = "entries.id"
+GOALS_TABLE_FK = "goals.id"
+EXPERIMENTS_TABLE_FK = "experiments.id"
 CONVERSATIONS_TABLE_FK = "conversations.id"
 MESSAGES_TABLE_FK = "messages.id"
 
@@ -118,6 +120,65 @@ class Entry(Base):
     )
 
 
+class Goal(Base):
+    """Personal growth goal (canonical store in PostgreSQL, mirrored in Neo4j)."""
+    __tablename__ = "goals"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    user_id: Mapped[str] = mapped_column(
+        TEXT,
+        ForeignKey(USER_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
+    title: Mapped[str | None] = mapped_column(VARCHAR(500))
+    description: Mapped[str] = mapped_column(TEXT, nullable=False)
+    status: Mapped[str] = mapped_column(VARCHAR(50), server_default="active", nullable=False)
+    priority: Mapped[str | None] = mapped_column(VARCHAR(50), server_default="medium")
+    target_date: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    achieved_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_goals_user_id", USER_ID_COLUMN),
+        Index("idx_goals_status", "status"),
+    )
+
+
+class Experiment(Base):
+    """Growth experiment (canonical store in PostgreSQL, mirrored in Neo4j)."""
+    __tablename__ = "experiments"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    user_id: Mapped[str] = mapped_column(
+        TEXT,
+        ForeignKey(USER_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
+    title: Mapped[str | None] = mapped_column(VARCHAR(500))
+    description: Mapped[str] = mapped_column(TEXT, nullable=False)
+    status: Mapped[str] = mapped_column(VARCHAR(50), server_default="active", nullable=False)
+    success: Mapped[int] = mapped_column(server_default="0", nullable=False)
+    outcome: Mapped[str | None] = mapped_column(TEXT, server_default="")
+    started_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
+    ended_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_experiments_user_id", USER_ID_COLUMN),
+        Index("idx_experiments_status", "status"),
+    )
+
+
 class EntryThread(Base):
     """Relationship between diary entries and conversation threads."""
     __tablename__ = "entry_threads"
@@ -160,7 +221,11 @@ class GoalThread(Base):
         ForeignKey(USER_TABLE_FK, ondelete=CASCADE_DELETE), 
         nullable=False
     )
-    goal_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    goal_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(GOALS_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
     thread_id: Mapped[str] = mapped_column(TEXT, nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     
@@ -184,7 +249,11 @@ class ExperimentThread(Base):
         ForeignKey(USER_TABLE_FK, ondelete=CASCADE_DELETE), 
         nullable=False
     )
-    experiment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    experiment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(EXPERIMENTS_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
     thread_id: Mapped[str] = mapped_column(TEXT, nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     
