@@ -52,6 +52,15 @@ class GoalCreateRequest(BaseModel):
     target_date: Optional[date] = None
 
 
+class GoalPatchRequest(BaseModel):
+    """Partial update for a goal."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    target_date: Optional[date] = None
+
+
 class GoalListResponse(BaseModel):
     """List of goals."""
     goals: List[GoalResponse]

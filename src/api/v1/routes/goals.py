@@ -17,6 +17,7 @@ from src.api.v1.schemas.goals import (
     GoalResponse,
     GoalListResponse,
     GoalCreateRequest,
+    GoalPatchRequest,
     RelatedEntryResponse,
     ConceptResponse,
 )
@@ -95,6 +96,32 @@ async def get_goal(
 ):
     """Get goal by ID."""
     return await _get_goal_response(id, user_id, db)
+
+
+@router.patch("/{id}", response_model=GoalResponse)
+async def patch_goal(
+    id: str,
+    request: GoalPatchRequest,
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Partially update a goal."""
+    try:
+        gid = UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid goal ID")
+
+    repo = GoalRepository(db)
+    goal = await repo.get_by_id(gid)
+    if not goal or goal.user_id != user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=MSG_GOAL_NOT_FOUND)
+
+    update_kwargs = request.model_dump(exclude_none=True)
+    if not update_kwargs:
+        return goal_to_response(goal)
+
+    updated = await repo.update(gid, **update_kwargs)
+    return goal_to_response(updated)
 
 
 @router.get("/{id}/related-entries", response_model=list[RelatedEntryResponse])

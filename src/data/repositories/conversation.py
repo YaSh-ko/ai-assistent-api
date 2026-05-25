@@ -38,6 +38,13 @@ class ConversationRepository(BaseRepository[Conversation]):
         """Get recent conversations."""
         return await self.get_by_user_id(user_id, skip=0, limit=limit)
 
+    async def delete_by_thread_id(self, user_id: str, thread_id: str) -> bool:
+        """Delete conversation owned by user (by LangGraph thread_id)."""
+        conversation = await self.get_by_thread_id(thread_id)
+        if not conversation or conversation.user_id != user_id:
+            return False
+        return await self.delete(conversation.id)
+
     async def create_with_metadata(
         self, user_id: str, thread_id: str, meta_data: dict, title: str = "Новый чат"
     ) -> Conversation:

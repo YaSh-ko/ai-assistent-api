@@ -58,11 +58,31 @@ class CategoryConversationResponse(BaseModel):
 
 
 class ThreadContextResponse(BaseModel):
-    """Context information for a conversation thread based on linked entries/events."""
-    type: str
+    """Context for a thread: linked entity info."""
+    type: str  # observation | goal | task | general
     title: str
     description: Optional[str] = None
-    entry_id: Optional[UUID] = None
+    entity_id: Optional[UUID] = None
+    entry_id: Optional[UUID] = None  # backward compat
+
+
+class LinkThreadRequest(BaseModel):
+    """Link a thread to an entity."""
+    entity_type: Literal["observation", "goal", "task"]
+    entity_id: UUID
+
+
+class LinkThreadResponse(BaseModel):
+    thread_id: str
+    entity_type: str
+    entity_id: UUID
+
+
+class EntityThreadsResponse(BaseModel):
+    """Threads linked to an entity."""
+    entity_type: str
+    entity_id: UUID
+    thread_ids: List[str]
 
 
 class UpdateThreadCategoryRequest(BaseModel):

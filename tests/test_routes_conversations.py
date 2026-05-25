@@ -94,3 +94,33 @@ def test_get_conversation_not_found(client_conv):
         Repo.return_value = repo
         r = client_conv.get(f"/v1/conversations/{uuid4()}")
     assert r.status_code == 404
+
+
+def test_delete_thread_success(client_conv):
+    """DELETE /v1/conversations/thread/{thread_id} — 204 при своей беседе."""
+    from uuid import uuid4
+    conv_id = uuid4()
+    mock_conv = MagicMock()
+    mock_conv.id = conv_id
+    mock_conv.user_id = "user-1"
+    with patch("src.api.v1.routes.conversations.ConversationRepository") as Repo:
+        repo = MagicMock()
+        repo.get_by_thread_id = AsyncMock(return_value=mock_conv)
+        repo.delete = AsyncMock(return_value=True)
+        Repo.return_value = repo
+        r = client_conv.delete("/v1/conversations/thread/thread-abc")
+    assert r.status_code == 204
+    repo.delete.assert_awaited_once_with(conv_id)
+
+
+def test_delete_thread_forbidden(client_conv):
+    """DELETE /v1/conversations/thread/{thread_id} — 403 чужая беседа."""
+    mock_conv = MagicMock()
+    mock_conv.id = "conv-id"
+    mock_conv.user_id = "other-user"
+    with patch("src.api.v1.routes.conversations.ConversationRepository") as Repo:
+        repo = MagicMock()
+        repo.get_by_thread_id = AsyncMock(return_value=mock_conv)
+        Repo.return_value = repo
+        r = client_conv.delete("/v1/conversations/thread/thread-abc")
+    assert r.status_code == 403
