@@ -1,18 +1,60 @@
 """
 Insights endpoints for deep analytics.
 """
+import logging
 from datetime import date, timedelta
-from typing import Annotated
+from typing import Annotated, List, Optional
 
+import httpx
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.v1.deps import get_current_user_id
+from src.core.config import settings
 from src.core.database import get_db
 from src.data.repositories.entry import EntryRepository
 from src.api.v1.schemas.insights import EntryInsightsResponse, EntryPatternItem
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+
+class SummarizeEntityItem(BaseModel):
+    id: str
+    type: str
+    title: str
+    description: str = ""
+    status: str = ""
+    created_at: str = ""
+
+
+class SummarizeRequest(BaseModel):
+    entities: List[SummarizeEntityItem]
+    context: str
+    date: Optional[str] = None
+
+
+class SummarizeResponse(BaseModel):
+    summary: str
+
+
+@router.post("/summarize", response_model=SummarizeResponse)
+async def summarize_entities(
+    request: SummarizeRequest,
+    user_id: Annotated[str, Depends(get_current_user_id)],
+):
+    """Proxy to AI service for LLM-powered summaries."""
+    url = f"{settings.AI_SERVICE_URL}/api/v1/ai/summarize"
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(url, json=request.model_dump())
+            resp.raise_for_status()
+            return SummarizeResponse(**resp.json())
+    except Exception as e:
+        logger.warning("[Insights] AI summarize failed: %s", e)
+        return SummarizeResponse(summary="Не удалось сгенерировать сводку. Попробуйте позже.")
 
 
 def _period_start(period: str, today: date) -> date:

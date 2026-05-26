@@ -40,6 +40,8 @@ class User(Base):
     image: Mapped[str | None] = mapped_column(TEXT)
     phone_number: Mapped[str | None] = mapped_column(VARCHAR(20))
     bio: Mapped[str | None] = mapped_column(TEXT)
+    ai_persona_tone: Mapped[str | None] = mapped_column(TEXT)
+    ai_persona_role: Mapped[str | None] = mapped_column(TEXT)
     createdAt: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), 
         server_default=func.now()

@@ -20,6 +20,7 @@ async def sync_goal_to_neo4j(goal: Goal) -> None:
         target_date = goal.target_date.isoformat() if goal.target_date else None
         query = """
         MERGE (g:Goal {id: $id})
+        ON CREATE SET g.created_at = datetime()
         SET g.user_id = $user_id,
             g.title = $title,
             g.description = $description,
@@ -27,7 +28,6 @@ async def sync_goal_to_neo4j(goal: Goal) -> None:
             g.priority = $priority,
             g.target_date = $target_date,
             g.updated_at = datetime()
-        ON CREATE SET g.created_at = datetime()
         RETURN g
         """
         await neo4j_client.execute_query_async(
@@ -56,6 +56,8 @@ async def create_goal_and_sync(
     priority: str = "medium",
     target_date: Optional[date] = None,
 ) -> Goal:
+    from src.services.semantic_linker import semantic_link_entity
+
     goal = Goal(
         user_id=user_id,
         title=title[:500] if title else None,
@@ -67,4 +69,12 @@ async def create_goal_and_sync(
     repo = GoalRepository(db)
     created = await repo.create(goal)
     await sync_goal_to_neo4j(created)
+    await semantic_link_entity(
+        entity_id=str(created.id),
+        entity_type="goal",
+        title=title,
+        description=description,
+        user_id=user_id,
+        db=db,
+    )
     return created

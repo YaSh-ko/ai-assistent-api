@@ -7,7 +7,10 @@ from typing import LiteralString
 import logging
 from uuid import uuid4
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.api.v1.deps import get_current_user_id
+from src.core.database import get_db
 from src.infrastructure.neo4j_client import neo4j_client
 from src.api.v1.schemas.graph import (
     RhizomeGraphResponse,
@@ -335,3 +338,56 @@ async def rollback_relationship(
         relationship=relationship,
         properties={"rollback_from_audit": request.audit_id, "rolled_back_action": action},
     )
+
+
+@router.post("/backfill")
+async def backfill_neo4j(
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Sync all PostgreSQL entities to Neo4j and create semantic relationships."""
+    from src.services.entry_service import sync_entry_to_neo4j
+    from src.services.goal_service import sync_goal_to_neo4j
+    from src.services.experiment_service import sync_experiment_to_neo4j
+    from src.services.semantic_linker import semantic_link_entity
+    from src.data.repositories.entry import EntryRepository
+    from src.data.repositories.goal import GoalRepository
+    from src.data.repositories.experiment import ExperimentRepository
+
+    counts = {"entries": 0, "goals": 0, "experiments": 0, "links": 0}
+
+    entry_repo = EntryRepository(db)
+    entries = await entry_repo.get_by_user_id(user_id, skip=0, limit=10000)
+    for entry in entries:
+        await sync_entry_to_neo4j(entry)
+        counts["entries"] += 1
+
+    goal_repo = GoalRepository(db)
+    goals = await goal_repo.get_by_user_id(user_id, skip=0, limit=10000)
+    for goal in goals:
+        await sync_goal_to_neo4j(goal)
+        counts["goals"] += 1
+
+    exp_repo = ExperimentRepository(db)
+    experiments = await exp_repo.get_by_user_id(user_id, skip=0, limit=10000)
+    for exp in experiments:
+        await sync_experiment_to_neo4j(exp)
+        counts["experiments"] += 1
+
+    all_entities = (
+        [(e, "observation", e.title or "", e.description or "") for e in entries]
+        + [(g, "goal", g.title or "", g.description or "") for g in goals]
+        + [(x, "task", x.title or "", x.description or "") for x in experiments]
+    )
+    for entity, etype, title, desc in all_entities:
+        links = await semantic_link_entity(
+            entity_id=str(entity.id),
+            entity_type=etype,
+            title=title,
+            description=desc,
+            user_id=user_id,
+        )
+        counts["links"] += len(links)
+
+    logger.info("Backfill complete for user %s: %s", user_id, counts)
+    return {"status": "ok", "synced": counts}

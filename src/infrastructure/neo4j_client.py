@@ -95,14 +95,31 @@ class Neo4jClient:
                 settings.NEO4J_URI,
                 auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD),
             )
-            # Test connection
             with self.driver.session() as session:
                 session.run("RETURN 1")
             self._connected = True
             logger.info("Neo4j connection established")
+            self._ensure_constraints()
         except Exception as e:
             logger.error(f"Failed to connect to Neo4j: {e}")
             raise
+
+    def _ensure_constraints(self):
+        """Create unique constraints if they don't exist."""
+        if not self.driver:
+            return
+        constraints = [
+            "CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entry) REQUIRE e.id IS UNIQUE",
+            "CREATE CONSTRAINT IF NOT EXISTS FOR (g:Goal) REQUIRE g.id IS UNIQUE",
+            "CREATE CONSTRAINT IF NOT EXISTS FOR (e:Experiment) REQUIRE e.id IS UNIQUE",
+        ]
+        try:
+            with self.driver.session() as session:
+                for c in constraints:
+                    session.run(cast(LiteralString, c))
+            logger.info("Neo4j unique constraints ensured")
+        except Exception as e:
+            logger.warning(f"Failed to create Neo4j constraints: {e}")
     
     def close(self):
         """Close Neo4j driver connection."""

@@ -58,7 +58,9 @@ async def create_entry_and_sync(
     description: str,
     event_date,
 ) -> Entry:
-    """Create entry in DB and sync to Neo4j. ChromaDB can be added later."""
+    """Create entry in DB, sync to Neo4j, and create semantic links."""
+    from src.services.semantic_linker import semantic_link_entity
+
     entry = Entry(
         user_id=user_id,
         title=title,
@@ -68,4 +70,12 @@ async def create_entry_and_sync(
     repo = EntryRepository(db)
     created = await repo.create(entry)
     await sync_entry_to_neo4j(created, language="", duration=0.0)
+    await semantic_link_entity(
+        entity_id=str(created.id),
+        entity_type="observation",
+        title=title,
+        description=description,
+        user_id=user_id,
+        db=db,
+    )
     return created

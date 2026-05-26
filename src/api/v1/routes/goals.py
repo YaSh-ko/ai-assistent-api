@@ -12,7 +12,7 @@ from src.core.database import get_db
 from src.data.repositories.goal import GoalRepository
 from src.infrastructure.neo4j_client import neo4j_client
 from src.services.entity_serializers import goal_to_response
-from src.services.goal_service import create_goal_and_sync
+from src.services.goal_service import create_goal_and_sync, sync_goal_to_neo4j
 from src.api.v1.schemas.goals import (
     GoalResponse,
     GoalListResponse,
@@ -121,6 +121,7 @@ async def patch_goal(
         return goal_to_response(goal)
 
     updated = await repo.update(gid, **update_kwargs)
+    await sync_goal_to_neo4j(updated)
     return goal_to_response(updated)
 
 

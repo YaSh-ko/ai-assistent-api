@@ -21,6 +21,7 @@ async def sync_experiment_to_neo4j(experiment: Experiment) -> None:
         started_at = experiment.started_at or experiment.created_at
         query = """
         MERGE (e:Experiment {id: $id})
+        ON CREATE SET e.created_at = datetime(), e.started_at = datetime()
         SET e.user_id = $user_id,
             e.title = $title,
             e.description = $description,
@@ -28,7 +29,6 @@ async def sync_experiment_to_neo4j(experiment: Experiment) -> None:
             e.success = $success,
             e.outcome = $outcome,
             e.updated_at = datetime()
-        ON CREATE SET e.created_at = datetime(), e.started_at = datetime()
         RETURN e
         """
         await neo4j_client.execute_query_async(
@@ -58,6 +58,8 @@ async def create_experiment_and_sync(
     outcome: str = "",
     started_at: Optional[datetime] = None,
 ) -> Experiment:
+    from src.services.semantic_linker import semantic_link_entity
+
     experiment = Experiment(
         user_id=user_id,
         title=title[:500] if title else None,
@@ -70,6 +72,13 @@ async def create_experiment_and_sync(
     repo = ExperimentRepository(db)
     created = await repo.create(experiment)
     await sync_experiment_to_neo4j(created)
+    await semantic_link_entity(
+        entity_id=str(created.id),
+        entity_type="task",
+        title=title,
+        description=description,
+        user_id=user_id,
+    )
     return created
 
 

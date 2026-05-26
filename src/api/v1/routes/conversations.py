@@ -1,6 +1,7 @@
 """
 Conversation endpoints.
 """
+import logging
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -8,6 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select, delete
+
+logger = logging.getLogger(__name__)
 from common.database.models import (
     Entry,
     Goal,
