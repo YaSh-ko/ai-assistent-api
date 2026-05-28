@@ -87,6 +87,10 @@ class ExperimentCreateRequest(BaseModel):
     status: str = "active"
     success: int = 0
     outcome: Optional[str] = ""
+    goal_id: Optional[UUID] = None
+    phase: str = "now"
+    due_date: Optional[date] = None
+    source: str = "user"
 
 
 class ExperimentListResponse(BaseModel):

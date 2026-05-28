@@ -78,3 +78,33 @@ async def create_goal_and_sync(
         db=db,
     )
     return created
+
+
+async def delete_goal_from_neo4j(goal_id: str) -> None:
+    try:
+        await neo4j_client.execute_query_async(
+            "MATCH (g:Goal {id: $id}) DETACH DELETE g",
+            {"id": goal_id},
+        )
+        logger.info("Goal %s deleted from Neo4j", goal_id)
+    except Exception as e:
+        logger.error("Error deleting goal from Neo4j: %s", e)
+
+
+async def delete_goal_and_sync(db: AsyncSession, goal_id: str, user_id: str) -> bool:
+    from uuid import UUID
+
+    try:
+        gid = UUID(goal_id)
+    except ValueError:
+        return False
+
+    repo = GoalRepository(db)
+    goal = await repo.get_by_id(gid)
+    if not goal or goal.user_id != user_id:
+        return False
+
+    deleted = await repo.delete(gid)
+    if deleted:
+        await delete_goal_from_neo4j(goal_id)
+    return deleted

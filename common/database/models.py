@@ -170,6 +170,14 @@ class Experiment(Base):
     status: Mapped[str] = mapped_column(VARCHAR(50), server_default="active", nullable=False)
     success: Mapped[int] = mapped_column(server_default="0", nullable=False)
     outcome: Mapped[str | None] = mapped_column(TEXT, server_default="")
+    goal_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("goals.id", ondelete=CASCADE_DELETE),
+        nullable=True,
+    )
+    phase: Mapped[str] = mapped_column(VARCHAR(20), server_default="now", nullable=False)
+    due_date: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    source: Mapped[str] = mapped_column(VARCHAR(20), server_default="user", nullable=False)
     started_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
     ended_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
@@ -178,6 +186,7 @@ class Experiment(Base):
     __table_args__ = (
         Index("idx_experiments_user_id", USER_ID_COLUMN),
         Index("idx_experiments_status", "status"),
+        Index("idx_experiments_goal_id", "goal_id"),
     )
 
 

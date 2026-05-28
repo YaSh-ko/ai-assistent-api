@@ -159,7 +159,15 @@ async def create_experiment(
         status=request.status,
         success=request.success,
         outcome=request.outcome or "",
+        goal_id=request.goal_id,
+        phase=request.phase,
+        due_date=request.due_date,
+        source=request.source,
     )
+    if request.goal_id:
+        from src.services.goal_task_service import link_goal_task_in_neo4j, sync_goal_completion_from_tasks
+        await link_goal_task_in_neo4j(str(request.goal_id), str(created.id))
+        await sync_goal_completion_from_tasks(db, request.goal_id, user_id)
     return experiment_to_response(created)
 
 

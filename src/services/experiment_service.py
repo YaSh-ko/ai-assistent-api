@@ -2,7 +2,7 @@
 Experiment service — PostgreSQL as source of truth, Neo4j for graph layer.
 """
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -57,6 +57,10 @@ async def create_experiment_and_sync(
     success: int = 0,
     outcome: str = "",
     started_at: Optional[datetime] = None,
+    goal_id: Optional[UUID] = None,
+    phase: str = "now",
+    due_date: Optional[date] = None,
+    source: str = "user",
 ) -> Experiment:
     from src.services.semantic_linker import semantic_link_entity
 
@@ -68,17 +72,23 @@ async def create_experiment_and_sync(
         success=success,
         outcome=outcome or "",
         started_at=started_at,
+        goal_id=goal_id,
+        phase=phase if phase in ("now", "next", "backlog") else "now",
+        due_date=due_date,
+        source=source or "user",
     )
     repo = ExperimentRepository(db)
     created = await repo.create(experiment)
     await sync_experiment_to_neo4j(created)
-    await semantic_link_entity(
-        entity_id=str(created.id),
-        entity_type="task",
-        title=title,
-        description=description,
-        user_id=user_id,
-    )
+    if not goal_id:
+        await semantic_link_entity(
+            entity_id=str(created.id),
+            entity_type="task",
+            title=title,
+            description=description,
+            user_id=user_id,
+            db=db,
+        )
     return created
 
 
