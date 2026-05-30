@@ -1,7 +1,7 @@
 """
 Schemas for entry endpoints.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 from uuid import UUID
@@ -25,6 +25,12 @@ class EntryCreateRequest(BaseModel):
     title: Optional[str] = None
     description: str
     event_date: date
+    valence: Optional[float] = Field(
+        default=None,
+        ge=-1.0,
+        le=1.0,
+        description="Emotional tone from detector: -1 (heavy) .. +1 (positive)",
+    )
 
 
 class EntryListResponse(BaseModel):
@@ -68,6 +74,41 @@ class RelatedSituationResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class EntryGraphRelationResponse(BaseModel):
+    """Related entity from Neo4j graph (semantic links)."""
+    id: str
+    entity_type: str
+    title: str
+    description: Optional[str] = None
+    relation_type: str
+    score: Optional[float] = None
+    reason: Optional[str] = None
+
+
+class EntryNoteResponse(BaseModel):
+    """Append-only supplement to an observation."""
+    id: UUID
+    entry_id: UUID
+    user_id: str
+    content: str
+    source: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class EntryNoteCreateRequest(BaseModel):
+    """Add a supplement to an existing observation."""
+    content: str
+    source: str = "chat"
+    valence: Optional[float] = Field(
+        default=None,
+        ge=-1.0,
+        le=1.0,
+        description="Emotional tone of this supplement from detector",
+    )
+
+
 class NegativeImpactResponse(BaseModel):
     """Negative impact response."""
     id: UUID
@@ -102,6 +143,8 @@ class EntryAnalysisResponse(BaseModel):
     entry: EntryResponse
     intensity_metrics: List[IntensityMetricResponse]
     related_situations: List[RelatedSituationResponse]
+    graph_relations: List[EntryGraphRelationResponse] = []
+    entry_notes: List[EntryNoteResponse] = []
     negative_impacts: List[NegativeImpactResponse]
     transformations: List[TransformationResponse]
     concepts: List[dict]  # From Neo4j

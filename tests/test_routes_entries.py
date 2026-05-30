@@ -59,12 +59,64 @@ def test_create_entry_success(client_entries):
     mock_entry.created_at = datetime.now(timezone.utc)
     mock_entry.updated_at = datetime.now(timezone.utc)
     create_mock = AsyncMock(return_value=mock_entry)
-    with patch("src.api.v1.routes.entries.create_entry_and_sync", create_mock):
+    with patch("src.api.v1.routes.entries.create_entry_and_sync", create_mock), \
+         patch("src.api.v1.routes.entries.record_entry_intensity", new_callable=AsyncMock) as rec_int:
         r = client_entries.post(
             "/v1/entries",
-            json={"title": "Title", "description": "Desc", "event_date": "2025-01-01"},
+            json={
+                "title": "Title",
+                "description": "Desc",
+                "event_date": "2025-01-01",
+                "valence": -0.6,
+            },
         )
     assert r.status_code == 201
+    rec_int.assert_awaited_once()
+    assert rec_int.await_args.kwargs["valence"] == -0.6
+
+
+def test_create_entry_note_success(client_entries):
+    """POST /v1/entries/{id}/notes — 201 append-only supplement."""
+    from datetime import date, datetime, timezone
+    entry_id = uuid4()
+    mock_entry = MagicMock()
+    mock_entry.id = entry_id
+    mock_entry.user_id = "user-1"
+    mock_note = MagicMock()
+    mock_note.id = uuid4()
+    mock_note.entry_id = entry_id
+    mock_note.user_id = "user-1"
+    mock_note.content = "Новая деталь"
+    mock_note.source = "chat"
+    mock_note.created_at = datetime.now(timezone.utc)
+
+    with patch("src.api.v1.routes.entries.EntryRepository") as ERepo, \
+         patch("src.api.v1.routes.entries.EntryNoteRepository") as NRepo, \
+         patch("src.api.v1.routes.entries.record_entry_intensity", new_callable=AsyncMock) as rec_int:
+        ERepo.return_value.get_by_id = AsyncMock(return_value=mock_entry)
+        NRepo.return_value.create = AsyncMock(return_value=mock_note)
+        r = client_entries.post(
+            f"/v1/entries/{entry_id}/notes",
+            json={"content": "Новая деталь", "source": "chat", "valence": 0.4},
+        )
+    assert r.status_code == 201
+    assert r.json()["content"] == "Новая деталь"
+    rec_int.assert_awaited_once()
+    assert rec_int.await_args.kwargs["valence"] == 0.4
+
+
+def test_create_entry_note_empty_400(client_entries):
+    """POST /v1/entries/{id}/notes — 400 on empty content."""
+    entry_id = uuid4()
+    mock_entry = MagicMock()
+    mock_entry.user_id = "user-1"
+    with patch("src.api.v1.routes.entries.EntryRepository") as ERepo:
+        ERepo.return_value.get_by_id = AsyncMock(return_value=mock_entry)
+        r = client_entries.post(
+            f"/v1/entries/{entry_id}/notes",
+            json={"content": "   "},
+        )
+    assert r.status_code == 400
 
 
 def test_get_entry_related_situations_not_found_404(client_entries):

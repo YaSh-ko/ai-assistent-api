@@ -337,6 +337,51 @@ class Neo4jClient:
         results = await self.execute_query_async(query, {"node_id": node_id})
         return [dict(record["m"]) for record in results]
 
+    async def get_entry_graph_relations(
+        self,
+        entry_id: str,
+        user_id: str,
+    ) -> List[Dict[str, Any]]:
+        """Bidirectional RELATES_TO links between this entry and other entries or goals."""
+        query = """
+        MATCH (e:Entry {id: $entry_id, user_id: $user_id})-[r:RELATES_TO]-(other)
+        WHERE other.user_id = $user_id AND other.id <> $entry_id
+          AND (other:Entry OR other:Goal)
+        RETURN other, labels(other) AS other_labels, properties(r) AS rel_props
+        ORDER BY coalesce(rel_props.score, 0) DESC
+        """
+        results = await self.execute_query_async(
+            query, {"entry_id": entry_id, "user_id": user_id},
+        )
+        relations: List[Dict[str, Any]] = []
+        seen: set[str] = set()
+        for record in results:
+            other = dict(record["other"])
+            other_id = str(other.get("id", ""))
+            if not other_id or other_id in seen:
+                continue
+            seen.add(other_id)
+            rel_props = record.get("rel_props") or {}
+            other_labels = record.get("other_labels") or []
+            is_goal = "Goal" in other_labels
+            title = (other.get("title") or "").strip()
+            if is_goal:
+                content = (other.get("description") or "").strip()
+                entity_type = "goal"
+            else:
+                content = (other.get("content") or "").strip()
+                entity_type = "observation"
+            relations.append({
+                "id": other_id,
+                "entity_type": entity_type,
+                "title": title or content[:120] or ("Цель" if is_goal else "Наблюдение"),
+                "description": content[:300] if content else None,
+                "relation_type": "RELATES_TO",
+                "score": rel_props.get("score"),
+                "reason": rel_props.get("reason"),
+            })
+        return relations
+
     async def get_entries_documenting_experiment(self, experiment_id: str) -> List[Dict[str, Any]]:
         """Entry -[:DOCUMENTS]-> Experiment: записи, документирующие эксперимент."""
         query = """

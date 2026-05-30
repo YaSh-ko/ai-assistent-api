@@ -1,22 +1,25 @@
 """
 Entry endpoints.
 """
+from datetime import date
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from common.database.models import Entry, IntensityMetric, RelatedSituation, NegativeImpact, Transformation
+from common.database.models import Entry, EntryNote, IntensityMetric, RelatedSituation, NegativeImpact, Transformation
 from src.api.v1.deps import get_current_user_id
 from src.core.database import get_db
 from src.data.repositories.entry import EntryRepository
+from src.data.repositories.entry_note import EntryNoteRepository
 from src.data.repositories.metrics import IntensityMetricRepository
 from src.data.repositories.related_situation import RelatedSituationRepository
 from src.data.repositories.negative_impact import NegativeImpactRepository
 from src.data.repositories.transformation import TransformationRepository
 from src.infrastructure.neo4j_client import neo4j_client
 from src.services.entry_service import create_entry_and_sync, delete_entry_and_sync
+from src.services.intensity_service import record_entry_intensity
 from src.api.v1.schemas.entries import (
     EntryResponse,
     EntryListResponse,
@@ -25,6 +28,9 @@ from src.api.v1.schemas.entries import (
     EntryAnalysisResponse,
     IntensityMetricResponse,
     RelatedSituationResponse,
+    EntryGraphRelationResponse,
+    EntryNoteResponse,
+    EntryNoteCreateRequest,
     NegativeImpactResponse,
     NegativeImpactCreateRequest,
     TransformationResponse,
@@ -79,6 +85,14 @@ async def create_entry(
         description=request.description,
         event_date=request.event_date,
     )
+    await record_entry_intensity(
+        db,
+        user_id=user_id,
+        entry_id=created.id,
+        metric_date=request.event_date,
+        valence=request.valence,
+        note="Первичная запись",
+    )
     return EntryResponse.model_validate(created)
 
 
@@ -114,13 +128,22 @@ async def get_entry_analysis(
     trans_repo = TransformationRepository(db)
     transformations = await trans_repo.get_by_source("entry", id)
     
+    # Get entry notes (append-only supplements)
+    notes_repo = EntryNoteRepository(db)
+    entry_notes = await notes_repo.get_by_entry_id(id)
+
     # Get concepts from Neo4j
     concepts = await neo4j_client.get_related_nodes(str(id), "MENTIONS", "Concept")
+
+    graph_relations_raw = await neo4j_client.get_entry_graph_relations(str(id), user_id)
+    graph_relations = [EntryGraphRelationResponse.model_validate(r) for r in graph_relations_raw]
     
     return EntryAnalysisResponse(
         entry=EntryResponse.model_validate(entry),
         intensity_metrics=[IntensityMetricResponse.model_validate(m) for m in metrics],
         related_situations=[RelatedSituationResponse.model_validate(r) for r in related],
+        graph_relations=graph_relations,
+        entry_notes=[EntryNoteResponse.model_validate(n) for n in entry_notes],
         negative_impacts=[NegativeImpactResponse.model_validate(i) for i in impacts],
         transformations=[TransformationResponse.model_validate(t) for t in transformations],
         concepts=concepts
@@ -243,6 +266,61 @@ async def patch_entry(
 
     updated = await entry_repo.update(id, **update_kwargs)
     return EntryResponse.model_validate(updated)
+
+
+@router.post("/{id}/notes", response_model=EntryNoteResponse, status_code=status.HTTP_201_CREATED)
+async def create_entry_note(
+    id: UUID,
+    request: EntryNoteCreateRequest,
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Append a supplement to an observation without changing the original description."""
+    entry_repo = EntryRepository(db)
+    entry = await entry_repo.get_by_id(id)
+
+    if not entry or entry.user_id != user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=MSG_ENTRY_NOT_FOUND)
+
+    content = request.content.strip()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Content is required")
+
+    notes_repo = EntryNoteRepository(db)
+    note = EntryNote(
+        entry_id=id,
+        user_id=user_id,
+        content=content,
+        source=request.source or "chat",
+    )
+    created = await notes_repo.create(note)
+    await record_entry_intensity(
+        db,
+        user_id=user_id,
+        entry_id=id,
+        metric_date=date.today(),
+        valence=request.valence,
+        note="Дополнение",
+    )
+    return EntryNoteResponse.model_validate(created)
+
+
+@router.get("/{id}/notes", response_model=list[EntryNoteResponse])
+async def get_entry_notes(
+    id: UUID,
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """List append-only supplements for an observation."""
+    entry_repo = EntryRepository(db)
+    entry = await entry_repo.get_by_id(id)
+
+    if not entry or entry.user_id != user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=MSG_ENTRY_NOT_FOUND)
+
+    notes_repo = EntryNoteRepository(db)
+    notes = await notes_repo.get_by_entry_id(id)
+    return [EntryNoteResponse.model_validate(n) for n in notes]
 
 
 @router.post("/{id}/negative-impacts", response_model=NegativeImpactResponse, status_code=status.HTTP_201_CREATED)

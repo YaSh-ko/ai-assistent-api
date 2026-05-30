@@ -349,12 +349,14 @@ async def backfill_neo4j(
     from src.services.entry_service import sync_entry_to_neo4j
     from src.services.goal_service import sync_goal_to_neo4j
     from src.services.experiment_service import sync_experiment_to_neo4j
-    from src.services.semantic_linker import semantic_link_entity
+    from src.services.semantic_linker import cleanup_embedding_links, semantic_link_entity
     from src.data.repositories.entry import EntryRepository
     from src.data.repositories.goal import GoalRepository
     from src.data.repositories.experiment import ExperimentRepository
 
-    counts = {"entries": 0, "goals": 0, "experiments": 0, "links": 0}
+    counts = {"entries": 0, "goals": 0, "experiments": 0, "links": 0, "cleaned": {}}
+
+    counts["cleaned"] = await cleanup_embedding_links(user_id)
 
     entry_repo = EntryRepository(db)
     entries = await entry_repo.get_by_user_id(user_id, skip=0, limit=10000)

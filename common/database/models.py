@@ -122,6 +122,38 @@ class Entry(Base):
     )
 
 
+class EntryNote(Base):
+    """Append-only supplement to an observation (does not overwrite original description)."""
+    __tablename__ = "entry_notes"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    entry_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(ENTRIES_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
+    user_id: Mapped[str] = mapped_column(
+        TEXT,
+        ForeignKey(USER_TABLE_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+    )
+    content: Mapped[str] = mapped_column(TEXT, nullable=False)
+    source: Mapped[str] = mapped_column(VARCHAR(50), nullable=False, server_default="chat")
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+    )
+
+    __table_args__ = (
+        Index("idx_entry_notes_entry_id", "entry_id"),
+        Index("idx_entry_notes_user_id", USER_ID_COLUMN),
+    )
+
+
 class Goal(Base):
     """Personal growth goal (canonical store in PostgreSQL, mirrored in Neo4j)."""
     __tablename__ = "goals"
