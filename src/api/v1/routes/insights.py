@@ -34,6 +34,7 @@ class SummarizeRequest(BaseModel):
     entities: List[SummarizeEntityItem]
     context: str
     date: Optional[str] = None
+    week_end: Optional[str] = None
 
 
 class SummarizeResponse(BaseModel):

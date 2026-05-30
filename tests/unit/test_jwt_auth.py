@@ -83,7 +83,7 @@ def test_tokens_equal_constant_time():
 
 def test_audience_roundtrip(test_jwt_keys):
     priv, pub, issuer = test_jwt_keys
-    aud = "delez-clients"
+    aud = "impulse-clients"
     exp = datetime.now(timezone.utc) + timedelta(days=1)
     tok = encode_session_jwt(
         priv,

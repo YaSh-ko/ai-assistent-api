@@ -24,6 +24,7 @@ async def sync_entry_to_neo4j(
         query = """
         MERGE (e:Entry {id: $entry_id})
         SET e.user_id = $user_id,
+            e.title = $title,
             e.content = $content,
             e.timestamp = datetime($timestamp),
             e.word_count = $word_count,
@@ -39,6 +40,7 @@ async def sync_entry_to_neo4j(
             {
                 "entry_id": str(entry.id),
                 "user_id": entry.user_id,
+                "title": (entry.title or "")[:500],
                 "content": entry.description or "",
                 "timestamp": timestamp.isoformat(),
                 "word_count": word_count,
@@ -79,3 +81,34 @@ async def create_entry_and_sync(
         db=db,
     )
     return created
+
+
+async def delete_entry_from_neo4j(entry_id: str) -> None:
+    """Remove Entry node and its relationships from Neo4j."""
+    try:
+        await neo4j_client.execute_query_async(
+            "MATCH (e:Entry {id: $id}) DETACH DELETE e",
+            {"id": entry_id},
+        )
+        logger.info("Entry %s deleted from Neo4j", entry_id)
+    except Exception as e:
+        logger.error("Error deleting entry from Neo4j: %s", e)
+
+
+async def delete_entry_and_sync(db: AsyncSession, entry_id: str, user_id: str) -> bool:
+    from uuid import UUID
+
+    try:
+        eid = UUID(entry_id)
+    except ValueError:
+        return False
+
+    repo = EntryRepository(db)
+    entry = await repo.get_by_id(eid)
+    if not entry or entry.user_id != user_id:
+        return False
+
+    deleted = await repo.delete(eid)
+    if deleted:
+        await delete_entry_from_neo4j(entry_id)
+    return deleted

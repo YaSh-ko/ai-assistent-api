@@ -83,7 +83,11 @@ async def create_goal_and_sync(
 async def delete_goal_from_neo4j(goal_id: str) -> None:
     try:
         await neo4j_client.execute_query_async(
-            "MATCH (g:Goal {id: $id}) DETACH DELETE g",
+            """
+            MATCH (g:Goal {id: $id})
+            OPTIONAL MATCH (g)-[:DECOMPOSED_INTO]->(e:Experiment)
+            DETACH DELETE e, g
+            """,
             {"id": goal_id},
         )
         logger.info("Goal %s deleted from Neo4j", goal_id)

@@ -25,7 +25,7 @@ class EmailService:
         self.smtp_username = settings.EmailConfiguration.Username
         self.smtp_password = settings.EmailConfiguration.Password
         self.from_email = settings.EmailConfiguration.From
-        self.from_name = "delez"  # ASCII only for Mail.ru compatibility
+        self.from_name = "Impulse"  # ASCII only for Mail.ru compatibility
     
     async def send_email(
         self, 
@@ -119,7 +119,7 @@ class EmailService:
         """
         reset_link = f"{reset_url_base}?token={reset_token}"
         
-        subject = "Сброс пароля - Delёz"
+        subject = "Сброс пароля - Impulse"
         
         html_content = self._get_password_reset_template(
             user_name=user_name,
@@ -129,7 +129,7 @@ class EmailService:
         text_content = f"""
 Здравствуйте, {user_name}!
 
-Вы запросили сброс пароля для вашего аккаунта delëz.
+Вы запросили сброс пароля для вашего аккаунта Impulse.
 
 Перейдите по ссылке для создания нового пароля:
 {reset_link}
@@ -139,7 +139,7 @@ class EmailService:
 Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.
 
 С уважением,
-Команда delëz
+Команда Impulse
         """.strip()
         
         return await self.send_email(
@@ -161,7 +161,7 @@ class EmailService:
         """
         verify_link = f"{verify_url_base}?token={verification_token}"
         
-        subject = "Подтверждение почты - Delёz"
+        subject = "Подтверждение почты - Impulse"
         
         html_content = self._get_verification_template(
             user_name=user_name,
@@ -171,13 +171,13 @@ class EmailService:
         text_content = f"""
 Здравствуйте, {user_name}!
 
-Благодарим вас за регистрацию в delëz.
+Благодарим вас за регистрацию в Impulse.
 
 Для завершения регистрации, пожалуйста, подтвердите ваш адрес электронной почты, перейдя по ссылке:
 {verify_link}
 
 С уважением,
-Команда delëz
+Команда Impulse
         """.strip()
         
         return await self.send_email(
@@ -197,7 +197,7 @@ class EmailService:
         button_text: str,
         button_link: str,
         extra_rows: str = "",
-        footer_text: str = "&copy; 2026 DELEZ. Все права защищены.",
+        footer_text: str = "&copy; 2026 Impulse. Все права защищены.",
     ) -> str:
         """Общая разметка письма (убирает дублирование HTML)."""
         return f"""
@@ -314,8 +314,8 @@ class EmailService:
                     </tr>
         """
         return self._email_layout(
-            page_title="Сброс пароля - Delёz",
-            logo_text="DELEZ",
+            page_title="Сброс пароля - Impulse",
+            logo_text="Impulse",
             heading="Сброс пароля",
             user_name=user_name,
             message="Вы запросили сброс пароля для вашего аккаунта. Нажмите на кнопку ниже, чтобы создать новый пароль:",
@@ -327,14 +327,14 @@ class EmailService:
     def _get_verification_template(self, user_name: str, verify_link: str) -> str:
         """Generate HTML template for email verification."""
         return self._email_layout(
-            page_title="Подтверждение почты - Delёz",
-            logo_text="Delёz",
+            page_title="Подтверждение почты - Impulse",
+            logo_text="Impulse",
             heading="Подтверждение почты",
             user_name=user_name,
             message="Благодарим вас за регистрацию. Нажмите на кнопку ниже, чтобы подтвердить ваш адрес электронной почты:",
             button_text="Подтвердить почту",
             button_link=verify_link,
-            footer_text="&copy; 2026 Delёz. Все права защищены.",
+            footer_text="&copy; 2026 Impulse. Все права защищены.",
         )
 
 

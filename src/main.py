@@ -1,8 +1,10 @@
 """
-delëz API - Main Application Entry Point
+Impulse API - Main Application Entry Point
 """
+import asyncio
 import logging
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -50,6 +52,7 @@ from src.api.v1.routes import (
     imports,
     insights,
     memoirs,
+    telegram_webhook,
 )
 
 # Configure logging
@@ -176,6 +179,7 @@ def _register_routers(app: FastAPI) -> None:
     app.include_router(analyses.router, prefix="/v1/analyses", tags=["analyses"])
     app.include_router(audio.router, prefix="/v1", tags=["audio"])
     app.include_router(beta_test.router, prefix="/v1/beta-test", tags=["beta-test"])
+    app.include_router(telegram_webhook.router, prefix="/v1/telegram", tags=["telegram"])
     app.include_router(concepts.router, prefix="/v1/concepts", tags=["concepts"])
     app.include_router(virtual_fields.router, prefix="/v1/virtual-fields", tags=["virtual-fields"])
     app.include_router(imports.router, prefix="/v1/import", tags=["import"])
@@ -189,14 +193,33 @@ def _register_routers(app: FastAPI) -> None:
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        stop_event = asyncio.Event()
+        polling_task: asyncio.Task | None = None
+        if settings.TELEGRAM_USE_POLLING and settings.TELEGRAM_BOT_TOKEN:
+            from src.services.telegram_polling import telegram_polling_loop
+
+            polling_task = asyncio.create_task(telegram_polling_loop(stop_event))
+        yield
+        if polling_task is not None:
+            stop_event.set()
+            polling_task.cancel()
+            try:
+                await polling_task
+            except asyncio.CancelledError:
+                pass
+
     app = FastAPI(
         title=settings.PROJECT_NAME,
-        description="Backend API for delëz project",
+        description="Backend API for Impulse project",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
         root_path="/api",
+        lifespan=lifespan,
     )
 
     _ensure_cors_origins_list()

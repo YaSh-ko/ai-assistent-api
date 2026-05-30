@@ -30,7 +30,7 @@ def _ensure_jwt_keys_for_tests() -> None:
     ).decode()
     os.environ["JWT_PRIVATE_KEY_PEM"] = priv_pem
     os.environ["JWT_PUBLIC_KEY_PEM"] = pub_pem
-    os.environ.setdefault("JWT_ISSUER", "delez-api-test")
+    os.environ.setdefault("JWT_ISSUER", "impulse-api-test")
 
 
 _ensure_jwt_keys_for_tests()
@@ -241,7 +241,7 @@ def test_jwt_keys():
     return (
         os.environ["JWT_PRIVATE_KEY_PEM"],
         os.environ["JWT_PUBLIC_KEY_PEM"],
-        os.environ.get("JWT_ISSUER", "delez-api-test"),
+        os.environ.get("JWT_ISSUER", "impulse-api-test"),
     )
 
 

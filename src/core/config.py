@@ -21,7 +21,7 @@ class EmailConfigModel(BaseModel):
 
 class Settings(BaseSettings):
     # Project
-    PROJECT_NAME: str = "delëz API"
+    PROJECT_NAME: str = "Impulse API"
     DEBUG: bool = False
     
     # PostgreSQL - можно задать либо DATABASE_URL напрямую, либо отдельные переменные
@@ -77,12 +77,19 @@ class Settings(BaseSettings):
     WHISPER_DEVICE: str = "cpu"  # "cpu" или "cuda" (если доступно GPU)
     
     EmailConfiguration: EmailConfigModel = Field(default_factory=EmailConfigModel)
+
+    # Telegram Bot (бета-тест: подтверждение записи)
+    TELEGRAM_BOT_TOKEN: Optional[str] = None
+    TELEGRAM_BOT_USERNAME: Optional[str] = None  # без @, для ссылки t.me/username
+    TELEGRAM_WEBHOOK_SECRET: Optional[str] = None
+    TELEGRAM_ADMIN_CHAT_ID: Optional[str] = None  # chat_id админа для /beta и уведомлений
+    TELEGRAM_USE_POLLING: bool = False  # true — long polling для локалки (без webhook)
     
     # Auth
     BETTER_AUTH_SECRET: str = "change_me_in_production"
     SESSION_LIFETIME_DAYS: int = 7
     # JWT сессии (RS256): PEM целиком в переменной окружения (многострочный через \\n в .env)
-    JWT_ISSUER: Optional[str] = "delez-api"
+    JWT_ISSUER: Optional[str] = "impulse-api"
     JWT_PRIVATE_KEY_PEM: Optional[str] = None
     JWT_PUBLIC_KEY_PEM: Optional[str] = None
     # Допуск по часам (exp/nbf/iat) при проверке JWT; 0 — строго по UTC сервера

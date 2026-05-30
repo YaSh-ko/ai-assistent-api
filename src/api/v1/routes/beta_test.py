@@ -1,5 +1,5 @@
 """
-Публичный эндпоинт заявки на бета-тестирование (форма на delez.tech/beta-test).
+Публичный эндпоинт заявки на бета-тестирование (legacy — предпочтительно запись через Telegram-бот).
 """
 import logging
 from typing import Annotated
@@ -11,6 +11,7 @@ from sqlalchemy import text
 
 from src.core.database import get_db
 from src.api.v1.schemas.beta_test import BetaTestSignupRequest, BetaTestSignupResponse
+from src.services.telegram_service import normalize_telegram_username, telegram_service
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +21,17 @@ router = APIRouter()
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
-    summary="Заявка на бета-тестирование",
-    description="Сохраняет telegram и email в таблицу beta_test.",
+    summary="Заявка на бета-тестирование (legacy)",
+    description="Сохраняет telegram и email. Рекомендуется запись через Telegram-бота.",
 )
 async def submit_beta_signup(
     body: BetaTestSignupRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> BetaTestSignupResponse:
     request_id = str(uuid.uuid4())
+    telegram = normalize_telegram_username(body.telegram.strip()) or body.telegram.strip()
+    email = str(body.email).strip().lower()
+
     await db.execute(
         text(
             """
@@ -37,10 +41,17 @@ async def submit_beta_signup(
         ),
         {
             "id": request_id,
-            "telegram": body.telegram.strip(),
-            "email": str(body.email).strip().lower(),
+            "telegram": telegram,
+            "email": email,
         },
     )
     await db.commit()
-    logger.info("Beta test signup recorded: email=%s", str(body.email).strip().lower())
-    return BetaTestSignupResponse(success=True, id=request_id)
+    logger.info("Beta test signup (legacy API): email=%s telegram=%s", email, telegram)
+
+    await telegram_service.notify_admin_beta_signup(db, telegram, email)
+
+    return BetaTestSignupResponse(
+        success=True,
+        id=request_id,
+        telegram_notified=False,
+    )

@@ -38,7 +38,7 @@ def _rhizome_time_filter(time_period: Optional[str]) -> str:
 def _node_description(node: Dict[str, Any], node_type: Optional[str]) -> str:
     """Build short description for a node by its type."""
     if node_type == "Entry":
-        return node.get("content_summary", node.get("content", ""))[:100]
+        return (node.get("title") or node.get("content_summary") or node.get("content") or "")[:100]
     if node_type == "Concept":
         return node.get("description", node.get("name", ""))[:100]
     if node_type == "Goal":
@@ -261,16 +261,30 @@ class Neo4jClient:
         return {"nodes": nodes, "links": links}
     
     async def search_nodes(self, user_id: str, query: str, limit: int = 50) -> List[Dict[str, Any]]:
-        """Search nodes by name or title."""
+        """Search nodes by title, name or content (case-insensitive)."""
+        q = query.strip().lower()
         search_query = """
         MATCH (n)
         WHERE n.user_id = $user_id
         AND (
-            (n:Entry AND (n.content CONTAINS $query OR n.content_summary CONTAINS $query))
-            OR (n:Concept AND n.name CONTAINS $query)
-            OR (n:Goal AND n.title CONTAINS $query)
-            OR (n:Experiment AND n.title CONTAINS $query)
-            OR (n:Analysis AND (n.title CONTAINS $query OR n.content CONTAINS $query))
+            (n:Entry AND (
+                toLower(coalesce(n.title, '')) CONTAINS $query
+                OR toLower(coalesce(n.content, '')) CONTAINS $query
+                OR toLower(coalesce(n.content_summary, '')) CONTAINS $query
+            ))
+            OR (n:Concept AND toLower(coalesce(n.name, '')) CONTAINS $query)
+            OR (n:Goal AND (
+                toLower(coalesce(n.title, '')) CONTAINS $query
+                OR toLower(coalesce(n.description, '')) CONTAINS $query
+            ))
+            OR (n:Experiment AND (
+                toLower(coalesce(n.title, '')) CONTAINS $query
+                OR toLower(coalesce(n.description, '')) CONTAINS $query
+            ))
+            OR (n:Analysis AND (
+                toLower(coalesce(n.title, '')) CONTAINS $query
+                OR toLower(coalesce(n.content, '')) CONTAINS $query
+            ))
         )
         RETURN n, labels(n) as n_labels
         LIMIT $limit
@@ -278,7 +292,7 @@ class Neo4jClient:
         
         results = await self.execute_query_async(search_query, {
             "user_id": user_id,
-            "query": query,
+            "query": q,
             "limit": limit
         })
         

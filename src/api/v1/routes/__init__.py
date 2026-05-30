@@ -18,6 +18,7 @@ from . import virtual_fields
 from . import imports
 from . import insights
 from . import memoirs
+from . import telegram_webhook
 
 __all__ = [
     "health", 
@@ -37,4 +38,5 @@ __all__ = [
     "imports",
     "insights",
     "memoirs",
+    "telegram_webhook",
 ]

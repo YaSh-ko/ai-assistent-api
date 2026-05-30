@@ -1,6 +1,6 @@
 """
 Audio transcription endpoints.
-Вариант 2: Интеграция напрямую в api (delëz-api).
+Вариант 2: Интеграция напрямую в api (Impulse API).
 """
 import json
 import logging

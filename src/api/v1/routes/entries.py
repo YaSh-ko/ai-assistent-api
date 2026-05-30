@@ -16,7 +16,7 @@ from src.data.repositories.related_situation import RelatedSituationRepository
 from src.data.repositories.negative_impact import NegativeImpactRepository
 from src.data.repositories.transformation import TransformationRepository
 from src.infrastructure.neo4j_client import neo4j_client
-from src.services.entry_service import create_entry_and_sync
+from src.services.entry_service import create_entry_and_sync, delete_entry_and_sync
 from src.api.v1.schemas.entries import (
     EntryResponse,
     EntryListResponse,
@@ -209,6 +209,18 @@ async def get_entry_transformations(
     trans_repo = TransformationRepository(db)
     transformations = await trans_repo.get_by_source("entry", id)
     return [TransformationResponse.model_validate(t) for t in transformations]
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_entry(
+    id: UUID,
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Delete an entry and remove it from the graph."""
+    deleted = await delete_entry_and_sync(db, str(id), user_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=MSG_ENTRY_NOT_FOUND)
 
 
 @router.patch("/{id}", response_model=EntryResponse)

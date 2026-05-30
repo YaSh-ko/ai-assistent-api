@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class BetaTestSignupRequest(BaseModel):
-    """Тело запроса с формы https://delez.tech/beta-test."""
+    """Тело запроса (legacy API; запись через Telegram-бот предпочтительнее)."""
 
     telegram: str = Field(
         ...,
@@ -19,3 +19,4 @@ class BetaTestSignupResponse(BaseModel):
 
     success: bool = True
     id: str
+    telegram_notified: bool = False
