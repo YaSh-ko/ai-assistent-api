@@ -3,6 +3,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from src.services.semantic_linker import (
+    CHROMA_SEARCH_THRESHOLD,
+    CROSS_TYPE_EMBEDDING_ONLY_THRESHOLD,
+    CROSS_TYPE_SAME_AREA_THRESHOLD,
     CROSS_TYPE_THRESHOLD,
     SIMILARITY_THRESHOLD,
     _has_topic_overlap,
@@ -18,6 +21,18 @@ class TestTopicOverlap:
         assert not _has_topic_overlap(
             "Ложусь после полуночи уже вторую неделю",
             "Сдать IELTS на 7.0 к сентябрю",
+        )
+
+    def test_spending_vs_fatigue_no_false_prefix(self):
+        assert not _has_topic_overlap(
+            "Еще заметил что много трачу",
+            "Усталость и прекращение занятий спортом",
+        )
+
+    def test_llm_boilerplate_descriptions_no_overlap(self):
+        assert not _has_topic_overlap(
+            "Пользователь чувствует усталость последние несколько недель и замечает снижение активности в спорте",
+            "Пользователь заметил, что стал тратить значительно больше денег",
         )
 
     def test_related_sleep_topics_overlap(self):
@@ -36,15 +51,22 @@ class TestTopicOverlap:
 class TestShouldLink:
     def test_rejects_cross_type_observation_goal_without_overlap(self):
         assert not _should_link(
-            "observation", "goal", 0.82,
+            "observation", "goal", 0.86,
             "Поздно ложусь", "Сдать IELTS",
         )
 
     def test_accepts_cross_type_observation_goal_with_overlap(self):
         assert _should_link(
-            "goal", "observation", 0.841,
+            "goal", "observation", 0.86,
             "Завести дневник с задачами на неделю",
             "Усталость из-за невыполнения простых задач",
+        )
+
+    def test_accepts_cross_type_thematic_without_shared_words(self):
+        assert _should_link(
+            "goal", "observation", CROSS_TYPE_EMBEDDING_ONLY_THRESHOLD,
+            "Хочу больше денег и стабильный доход",
+            "Нашёл подработку на вечерах",
         )
 
     def test_rejects_cross_type_below_threshold(self):
@@ -54,35 +76,75 @@ class TestShouldLink:
             "Усталость из-за невыполнения задач",
         )
 
-    def test_rejects_same_type_without_overlap_and_low_score(self):
+    def test_rejects_same_type_without_overlap(self):
         assert not _should_link(
-            "observation", "observation", 0.79,
+            "observation", "observation", 0.94,
+            "Стал много пить кофе",
+            "Последние дни долго не могу уснуть",
+        )
+
+    def test_rejects_same_type_below_search_threshold(self):
+        assert not _should_link(
+            "observation", "observation", SIMILARITY_THRESHOLD - 0.01,
             "Поздно ложусь", "Сдать IELTS",
         )
 
     def test_accepts_same_type_with_overlap(self):
         assert _should_link(
-            "observation", "observation", 0.80,
+            "observation", "observation", SIMILARITY_THRESHOLD,
             "Ложусь после полуночи", "После полуночи не могу уснуть",
         )
 
-    def test_accepts_very_high_confidence_without_overlap(self):
-        assert _should_link(
-            "observation", "observation", 0.93,
-            "Бессонница", "Не могу уснуть",
-        )
-
-    def test_rejects_high_confidence_without_overlap(self):
+    def test_rejects_unrelated_same_type_even_at_high_score(self):
         assert not _should_link(
-            "observation", "observation", 0.86,
-            "Поздний сон перед встречей",
-            "Устал, не успел постирать вещи с Wildberries",
+            "observation", "observation", 0.94,
+            "Усталость и прекращение занятий спортом",
+            "Заметил увеличение заработка на проекте",
         )
 
-    def test_related_topics_via_prefix_overlap(self):
-        assert _has_topic_overlap(
-            "Ложусь поздно",
-            "Поздний сон перед встречей",
+    def test_rejects_cross_type_spending_vs_fatigue_without_overlap(self):
+        assert not _should_link(
+            "observation", "goal", 0.90,
+            "Ещё заметил что много трачу на еду и подписки",
+            "Усталость и прекращение занятий спортом",
+        )
+
+    def test_rejects_obs_obs_different_life_areas(self):
+        assert not _should_link(
+            "observation", "observation", 0.94,
+            "Много трачу на подписки",
+            "Усталость и снижение активности в спорте",
+            "finance",
+            "health",
+        )
+
+    def test_accepts_goal_obs_same_health_area(self):
+        assert _should_link(
+            "goal", "observation", CROSS_TYPE_SAME_AREA_THRESHOLD,
+            "Вернуться к регулярным тренировкам три раза в неделю",
+            "Усталость и снижение активности в спорте",
+            "health",
+            "health",
+        )
+
+    def test_accepts_goal_obs_same_health_area_typical_chroma_score(self):
+        """Типичный score obs↔goal в Chroma (~0.83) при одной теме."""
+        assert _should_link(
+            "goal", "observation", 0.827,
+            "Возврат к регулярным тренировкам",
+            "Усталость и прекращение занятий спортом",
+            "health",
+            "health",
+        )
+
+    def test_chroma_search_threshold_below_link_threshold(self):
+        assert CHROMA_SEARCH_THRESHOLD < SIMILARITY_THRESHOLD
+
+    def test_rejects_cross_type_embedding_only_below_new_threshold(self):
+        assert not _should_link(
+            "goal", "observation", 0.90,
+            "Хочу больше денег и стабильный доход",
+            "Усталость из-за перегрузки на работе",
         )
 
     def test_rejects_below_threshold(self):
@@ -108,7 +170,7 @@ async def test_semantic_link_entity_skips_unrelated_cross_type_candidates():
                 "entity_type": "goal",
                 "title": "Сдать IELTS",
                 "description": "Балл 7.0",
-                "score": 0.82,
+                "score": 0.86,
             },
         ]
         with patch("src.services.semantic_linker.neo4j_client") as neo:
@@ -133,7 +195,7 @@ async def test_semantic_link_entity_links_related_observation_to_goal():
                 "entity_type": "observation",
                 "title": "Усталость из-за невыполнения простых задач",
                 "description": "",
-                "score": 0.841,
+                "score": 0.86,
             },
         ]
         with patch("src.services.semantic_linker.neo4j_client") as neo:

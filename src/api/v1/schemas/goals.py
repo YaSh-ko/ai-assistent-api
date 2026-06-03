@@ -50,6 +50,7 @@ class GoalCreateRequest(BaseModel):
     status: str = "active"
     priority: str = "medium"
     target_date: Optional[date] = None
+    life_area: Optional[str] = None
 
 
 class GoalPatchRequest(BaseModel):

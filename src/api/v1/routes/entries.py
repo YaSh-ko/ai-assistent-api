@@ -84,6 +84,7 @@ async def create_entry(
         title=request.title or "",
         description=request.description,
         event_date=request.event_date,
+        life_area=request.life_area,
     )
     await record_entry_intensity(
         db,

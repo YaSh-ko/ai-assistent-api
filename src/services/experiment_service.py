@@ -80,7 +80,18 @@ async def create_experiment_and_sync(
     repo = ExperimentRepository(db)
     created = await repo.create(experiment)
     await sync_experiment_to_neo4j(created)
-    if not goal_id:
+    if goal_id:
+        logger.info(
+            "[ExperimentService] Skip semantic link for task %s (bound to goal %s)",
+            created.id,
+            goal_id,
+        )
+    else:
+        logger.info(
+            "[ExperimentService] Trigger semantic link for orphan task %s title=%r",
+            created.id,
+            (title or "")[:60],
+        )
         await semantic_link_entity(
             entity_id=str(created.id),
             entity_type="task",

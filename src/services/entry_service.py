@@ -30,6 +30,7 @@ async def sync_entry_to_neo4j(
             e.word_count = $word_count,
             e.transcription_language = $language,
             e.audio_duration = $duration,
+            e.life_area = $life_area,
             e.updated_at = datetime()
         RETURN e
         """
@@ -42,6 +43,7 @@ async def sync_entry_to_neo4j(
                 "user_id": entry.user_id,
                 "title": (entry.title or "")[:500],
                 "content": entry.description or "",
+                "life_area": entry.life_area,
                 "timestamp": timestamp.isoformat(),
                 "word_count": word_count,
                 "language": language,
@@ -59,6 +61,7 @@ async def create_entry_and_sync(
     title: str,
     description: str,
     event_date,
+    life_area: str | None = None,
 ) -> Entry:
     """Create entry in DB, sync to Neo4j, and create semantic links."""
     from src.services.semantic_linker import semantic_link_entity
@@ -68,17 +71,31 @@ async def create_entry_and_sync(
         title=title,
         description=description,
         event_date=event_date,
+        life_area=life_area,
     )
     repo = EntryRepository(db)
     created = await repo.create(entry)
     await sync_entry_to_neo4j(created, language="", duration=0.0)
-    await semantic_link_entity(
+    logger.info(
+        "[EntryService] Trigger semantic link: entry=%s area=%s title=%r desc_len=%d",
+        created.id,
+        life_area or "-",
+        (title or "")[:60],
+        len(description or ""),
+    )
+    links = await semantic_link_entity(
         entity_id=str(created.id),
         entity_type="observation",
         title=title,
         description=description,
         user_id=user_id,
         db=db,
+        life_area=life_area,
+    )
+    logger.info(
+        "[EntryService] Semantic link done: entry=%s links_created=%d",
+        created.id,
+        len(links),
     )
     return created
 

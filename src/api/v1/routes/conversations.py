@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select, delete
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 from common.database.models import (
@@ -210,6 +211,49 @@ async def get_entity_threads(
     )
 
 
+def _link_thread_response(
+    thread_id: str,
+    entity_type: str,
+    entity_id: UUID,
+) -> LinkThreadResponse:
+    return LinkThreadResponse(
+        thread_id=thread_id,
+        entity_type=entity_type,
+        entity_id=entity_id,
+    )
+
+
+async def _thread_entity_link_exists(
+    db: AsyncSession,
+    *,
+    user_id: str,
+    entity_type: str,
+    entity_id: UUID,
+    thread_id: str,
+) -> bool:
+    if entity_type == "observation":
+        stmt = select(EntryThread.id).where(
+            EntryThread.user_id == user_id,
+            EntryThread.entry_id == entity_id,
+            EntryThread.thread_id == thread_id,
+        )
+    elif entity_type == "goal":
+        stmt = select(GoalThread.id).where(
+            GoalThread.user_id == user_id,
+            GoalThread.goal_id == entity_id,
+            GoalThread.thread_id == thread_id,
+        )
+    elif entity_type == "task":
+        stmt = select(ExperimentThread.id).where(
+            ExperimentThread.user_id == user_id,
+            ExperimentThread.experiment_id == entity_id,
+            ExperimentThread.thread_id == thread_id,
+        )
+    else:
+        return False
+    return (await db.execute(stmt)).first() is not None
+
+
 @router.post("/thread/{thread_id}/link", response_model=LinkThreadResponse, status_code=status.HTTP_201_CREATED)
 async def link_thread_to_entity(
     thread_id: str,
@@ -217,30 +261,45 @@ async def link_thread_to_entity(
     user_id: Annotated[str, Depends(get_current_user_id)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    """Link a thread to an entity (observation, goal, or task)."""
+    """Link a thread to an entity (observation, goal, or task). Idempotent on duplicate."""
     eid = request.entity_id
+    entity_type = request.entity_type
 
-    if request.entity_type == "observation":
-        link = EntryThread(user_id=user_id, entry_id=eid, thread_id=thread_id)
-    elif request.entity_type == "goal":
-        link = GoalThread(user_id=user_id, goal_id=eid, thread_id=thread_id)
-    elif request.entity_type == "task":
-        link = ExperimentThread(user_id=user_id, experiment_id=eid, thread_id=thread_id)
-    else:
+    if entity_type not in ("observation", "goal", "task"):
         raise HTTPException(status_code=400, detail="Unknown entity_type")
+
+    if await _thread_entity_link_exists(
+        db,
+        user_id=user_id,
+        entity_type=entity_type,
+        entity_id=eid,
+        thread_id=thread_id,
+    ):
+        return _link_thread_response(thread_id, entity_type, eid)
+
+    if entity_type == "observation":
+        link = EntryThread(user_id=user_id, entry_id=eid, thread_id=thread_id)
+    elif entity_type == "goal":
+        link = GoalThread(user_id=user_id, goal_id=eid, thread_id=thread_id)
+    else:
+        link = ExperimentThread(user_id=user_id, experiment_id=eid, thread_id=thread_id)
 
     db.add(link)
     try:
         await db.commit()
-    except Exception:
+    except IntegrityError:
         await db.rollback()
+        if await _thread_entity_link_exists(
+            db,
+            user_id=user_id,
+            entity_type=entity_type,
+            entity_id=eid,
+            thread_id=thread_id,
+        ):
+            return _link_thread_response(thread_id, entity_type, eid)
         raise HTTPException(status_code=409, detail="Link already exists")
 
-    return LinkThreadResponse(
-        thread_id=thread_id,
-        entity_type=request.entity_type,
-        entity_id=eid,
-    )
+    return _link_thread_response(thread_id, entity_type, eid)
 
 
 def _short_desc(text: str | None, max_len: int = 100) -> str:

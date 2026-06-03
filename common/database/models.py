@@ -115,6 +115,7 @@ class Entry(Base):
     transcription_model: Mapped[str | None] = mapped_column(VARCHAR(50))  # "whisper-turbo"
     transcription_language: Mapped[str | None] = mapped_column(VARCHAR(10))  # "ru", "en"
     audio_file_url: Mapped[str | None] = mapped_column(TEXT)  # URL to stored audio file
+    life_area: Mapped[str | None] = mapped_column(VARCHAR(32))  # career|health|finance|...
 
     __table_args__ = (
         Index("idx_entries_user_id", USER_ID_COLUMN),
@@ -176,6 +177,7 @@ class Goal(Base):
     achieved_at: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    life_area: Mapped[str | None] = mapped_column(VARCHAR(32))
 
     __table_args__ = (
         Index("idx_goals_user_id", USER_ID_COLUMN),

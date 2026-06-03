@@ -113,6 +113,25 @@ def test_delete_thread_success(client_conv):
     repo.delete.assert_awaited_once_with(conv_id)
 
 
+def test_link_thread_idempotent_when_already_linked(client_conv):
+    """POST /thread/{id}/link — 201 when link already exists (no 409)."""
+    from uuid import uuid4
+
+    entry_id = uuid4()
+    thread_id = "thread-linked"
+
+    with patch("src.api.v1.routes.conversations._thread_entity_link_exists", new_callable=AsyncMock) as exists:
+        exists.return_value = True
+        r = client_conv.post(
+            f"/v1/conversations/thread/{thread_id}/link",
+            json={"entity_type": "observation", "entity_id": str(entry_id)},
+        )
+    assert r.status_code == 201
+    body = r.json()
+    assert body["thread_id"] == thread_id
+    assert body["entity_id"] == str(entry_id)
+
+
 def test_delete_thread_forbidden(client_conv):
     """DELETE /v1/conversations/thread/{thread_id} — 403 чужая беседа."""
     mock_conv = MagicMock()

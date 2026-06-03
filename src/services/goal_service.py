@@ -27,6 +27,7 @@ async def sync_goal_to_neo4j(goal: Goal) -> None:
             g.status = $status,
             g.priority = $priority,
             g.target_date = $target_date,
+            g.life_area = $life_area,
             g.updated_at = datetime()
         RETURN g
         """
@@ -40,6 +41,7 @@ async def sync_goal_to_neo4j(goal: Goal) -> None:
                 "status": goal.status,
                 "priority": goal.priority or "medium",
                 "target_date": target_date,
+                "life_area": goal.life_area,
             },
         )
         logger.info("Goal %s synced to Neo4j", goal.id)
@@ -55,6 +57,7 @@ async def create_goal_and_sync(
     status: str = "active",
     priority: str = "medium",
     target_date: Optional[date] = None,
+    life_area: Optional[str] = None,
 ) -> Goal:
     from src.services.semantic_linker import semantic_link_entity
 
@@ -65,17 +68,31 @@ async def create_goal_and_sync(
         status=status,
         priority=priority,
         target_date=target_date,
+        life_area=life_area,
     )
     repo = GoalRepository(db)
     created = await repo.create(goal)
     await sync_goal_to_neo4j(created)
-    await semantic_link_entity(
+    logger.info(
+        "[GoalService] Trigger semantic link: goal=%s area=%s title=%r desc_len=%d",
+        created.id,
+        life_area or "-",
+        (title or "")[:60],
+        len(description or ""),
+    )
+    links = await semantic_link_entity(
         entity_id=str(created.id),
         entity_type="goal",
         title=title,
         description=description,
         user_id=user_id,
         db=db,
+        life_area=life_area,
+    )
+    logger.info(
+        "[GoalService] Semantic link done: goal=%s links_created=%d",
+        created.id,
+        len(links),
     )
     return created
 

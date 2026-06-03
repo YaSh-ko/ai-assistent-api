@@ -134,6 +134,7 @@ async def create_goal(
         status=request.status,
         priority=request.priority,
         target_date=request.target_date,
+        life_area=request.life_area,
     )
     return goal_to_response(created)
 

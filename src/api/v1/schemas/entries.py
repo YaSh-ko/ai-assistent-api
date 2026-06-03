@@ -31,6 +31,10 @@ class EntryCreateRequest(BaseModel):
         le=1.0,
         description="Emotional tone from detector: -1 (heavy) .. +1 (positive)",
     )
+    life_area: Optional[str] = Field(
+        default=None,
+        description="Life area from detector: career|health|finance|...",
+    )
 
 
 class EntryListResponse(BaseModel):

@@ -7,9 +7,11 @@ from typing import LiteralString
 import logging
 from uuid import uuid4
 
+import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.v1.deps import get_current_user_id
+from src.core.config import settings
 from src.core.database import get_db
 from src.infrastructure.neo4j_client import neo4j_client
 from src.api.v1.schemas.graph import (
@@ -355,8 +357,24 @@ async def backfill_neo4j(
     from src.data.repositories.experiment import ExperimentRepository
 
     counts = {"entries": 0, "goals": 0, "experiments": 0, "links": 0, "cleaned": {}}
+    logger.info("[GraphBackfill] === Start === user=%s", user_id)
 
     counts["cleaned"] = await cleanup_embedding_links(user_id)
+
+    try:
+        reindex_url = f"{settings.AI_SERVICE_URL}/api/v1/ai/reindex-entities"
+        logger.info("[GraphBackfill] Chroma reindex POST %s", reindex_url)
+        async with httpx.AsyncClient(timeout=60) as client:
+            reindex_resp = await client.post(reindex_url, json={"user_id": user_id})
+            reindex_resp.raise_for_status()
+            counts["chroma_reindexed"] = reindex_resp.json().get("indexed", 0)
+        logger.info(
+            "[GraphBackfill] Chroma reindexed %d entities",
+            counts["chroma_reindexed"],
+        )
+    except Exception as e:
+        logger.warning("[GraphBackfill] Chroma reindex failed: %s", e, exc_info=True)
+        counts["chroma_reindexed"] = 0
 
     entry_repo = EntryRepository(db)
     entries = await entry_repo.get_by_user_id(user_id, skip=0, limit=10000)
@@ -377,19 +395,44 @@ async def backfill_neo4j(
         counts["experiments"] += 1
 
     all_entities = (
-        [(e, "observation", e.title or "", e.description or "") for e in entries]
-        + [(g, "goal", g.title or "", g.description or "") for g in goals]
-        + [(x, "task", x.title or "", x.description or "") for x in experiments]
+        [(e, "observation", e.title or "", e.description or "", e.life_area) for e in entries]
+        + [(g, "goal", g.title or "", g.description or "", g.life_area) for g in goals]
+        + [(x, "task", x.title or "", x.description or "", None) for x in experiments]
     )
-    for entity, etype, title, desc in all_entities:
+    logger.info(
+        "[GraphBackfill] Semantic link pass for %d entities "
+        "(entries=%d goals=%d tasks=%d)",
+        len(all_entities),
+        len(entries),
+        len(goals),
+        len(experiments),
+    )
+    for idx, (entity, etype, title, desc, area) in enumerate(all_entities, start=1):
+        logger.info(
+            "[GraphBackfill] Link %d/%d: type=%s id=%s area=%s title=%r",
+            idx,
+            len(all_entities),
+            etype,
+            str(entity.id)[:8],
+            area or "-",
+            (title or "")[:60],
+        )
         links = await semantic_link_entity(
             entity_id=str(entity.id),
             entity_type=etype,
             title=title,
             description=desc,
             user_id=user_id,
+            life_area=area,
         )
         counts["links"] += len(links)
+        logger.info(
+            "[GraphBackfill] Link %d/%d done: +%d links (total %d)",
+            idx,
+            len(all_entities),
+            len(links),
+            counts["links"],
+        )
 
-    logger.info("Backfill complete for user %s: %s", user_id, counts)
+    logger.info("[GraphBackfill] === Done === user=%s counts=%s", user_id, counts)
     return {"status": "ok", "synced": counts}
